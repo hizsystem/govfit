@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import type { DataSource, SupportProgram } from "@/lib/types";
 import { PROGRAMS as SAMPLE_PROGRAMS } from "@/lib/data/programs";
 import {
@@ -17,11 +18,21 @@ export interface LoadedPrograms {
 /**
  * 추천에 사용할 지원사업 목록을 불러온다.
  *
- * 여러 공공 API(기업마당 · K-Startup …)를 동시에 호출해 합치고, 제목 기준으로
- * 중복을 제거한다. 모든 API가 실패하면 내장 샘플로 폴백한다.
- * (한 소스가 실패해도 나머지로 계속 동작.)
+ * 집계 결과를 1시간 캐시한다. (핵심 성능 포인트)
+ * 개별 fetch에도 revalidate가 걸려 있지만, Next의 fetch Data Cache는 GET만
+ * 캐시한다. 판판대로는 list·상세를 POST로 호출해 매 요청 재실행(수십 번)됐고
+ * 그게 응답 지연의 주범이었다. 그래서 GET/POST 구분 없이 집계 "결과 전체"를
+ * 캐시해, 매 요청은 캐시를 읽어 필터·점수만 계산하도록 한다.
+ * 만료되면 stale을 즉시 주고 백그라운드로 갱신 → 사용자는 거의 항상 빠르게 받는다.
  */
-export async function loadPrograms(): Promise<LoadedPrograms> {
+export const loadPrograms: () => Promise<LoadedPrograms> = unstable_cache(
+  loadProgramsUncached,
+  ["govfit-programs-v1"],
+  { revalidate: 60 * 60 },
+);
+
+/** 실제 다중 소스 집계 (느림 — 외부 공공 API 6종 호출). loadPrograms가 캐시한다. */
+async function loadProgramsUncached(): Promise<LoadedPrograms> {
   const settled = await Promise.allSettled([
     fetchBizinfoPrograms(),
     fetchBizinfoAgriPrograms(), // 농업 분야 공고 추가 수집 (제목 기준 중복 제거됨)
