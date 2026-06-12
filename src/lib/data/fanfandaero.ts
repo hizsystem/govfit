@@ -65,6 +65,7 @@ export async function fetchFanfandaeroPrograms(): Promise<SupportProgram[]> {
     next: { revalidate: 60 * 60 }, // 1시간마다 갱신
     headers: AJAX_HEADERS,
     body: `pageIndex=1&pageUnit=${PAGE_UNIT}`,
+    signal: AbortSignal.timeout(12_000), // 지연 시 빠르게 실패 → 다른 소스로 계속
   });
   if (!res.ok) throw new Error(`판판대로 HTTP ${res.status}`);
 
@@ -107,6 +108,7 @@ async function fetchContact(
       next: { revalidate: 60 * 60 },
       headers: AJAX_HEADERS,
       body: `sprtBizCd=${encodeURIComponent(sprtBizCd)}`,
+      signal: AbortSignal.timeout(8_000), // 문의처 보강용 — 짧게 끊는다
     });
     if (!res.ok) return null;
 

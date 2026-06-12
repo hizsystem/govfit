@@ -4,6 +4,10 @@ import { loadPrograms } from "@/lib/data/loader";
 import { filterPrograms } from "@/lib/filter";
 import { scoreCandidates } from "@/lib/match";
 
+// 여러 공공 API(기업마당·K-Startup·aT·판판대로)를 병렬 호출하므로
+// Vercel 기본 함수 타임아웃보다 여유를 둔다. (각 fetch는 12초에 끊겨 폴백)
+export const maxDuration = 30;
+
 /**
  * POST /api/recommend
  *

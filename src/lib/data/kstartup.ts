@@ -62,6 +62,7 @@ export async function fetchKstartupPrograms(count = 300): Promise<SupportProgram
   const res = await fetch(url, {
     next: { revalidate: 60 * 60 }, // 1시간마다 최신 공고 갱신
     headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(12_000), // 지연 시 빠르게 실패 → 다른 소스로 계속
   });
   if (!res.ok) throw new Error(`K-Startup API HTTP ${res.status}`);
 

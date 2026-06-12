@@ -37,6 +37,7 @@ async function fetchAtPage(page: number): Promise<SupportProgram[]> {
   const res = await fetch(`${LIST}&page=${page}`, {
     next: { revalidate: 60 * 60 }, // 1시간마다 갱신
     headers: { "User-Agent": "Mozilla/5.0", Accept: "text/html" },
+    signal: AbortSignal.timeout(12_000), // 지연 시 빠르게 실패 → 다른 소스로 계속
   });
   if (!res.ok) throw new Error(`aT HTTP ${res.status}`);
   const html = await res.text();

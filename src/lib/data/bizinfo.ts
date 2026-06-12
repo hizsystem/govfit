@@ -103,6 +103,9 @@ async function fetchBizinfoBy(
   const res = await fetch(url, {
     next: { revalidate: 60 * 60 }, // 1시간마다 최신 공고 갱신
     headers: { Accept: "application/json" },
+    // 정부 서버 지연 시 빠르게 끊어 폴백을 살린다. 캐시 히트는 네트워크를
+    // 타지 않으므로 영향 없음. (Vercel 함수 타임아웃으로 전체가 죽는 것 방지)
+    signal: AbortSignal.timeout(12_000),
   });
   if (!res.ok) {
     throw new Error(`기업마당 API HTTP ${res.status}`);
