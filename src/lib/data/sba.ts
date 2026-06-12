@@ -1,5 +1,11 @@
 import type { Category, SupportProgram } from "@/lib/types";
-import { clean, extractPhone } from "@/lib/data/bizinfo";
+import {
+  clean,
+  extractPhone,
+  extractPurpose,
+  summarize,
+  truncate,
+} from "@/lib/data/bizinfo";
 
 /**
  * 서울경제진흥원(SBA, 옛 서울산업진흥원) 사업공고 연동.
@@ -38,7 +44,98 @@ export async function fetchSbaPrograms(): Promise<SupportProgram[]> {
   if (programs.length === 0) {
     throw new Error("SBA 공고를 가져오지 못했습니다. (사이트 구조 변경 가능)");
   }
+
+  // 목록엔 본문이 없어 제목만으로는 매칭 정확도가 낮다. 공고별 상세 페이지에서
+  // 본문 전문(지원내용·자격·목적)·첨부 공고문명을 병렬로 보강한다.
+  // 한 건이 실패해도 해당 공고는 목록 정보(제목·기간 등)로 그대로 노출된다.
+  await Promise.allSettled(
+    programs.map(async (p) => {
+      const mid = p.id.replace(/^sba-/, "");
+      const detail = await fetchSbaDetail(mid);
+      if (detail.description) {
+        p.supportContent = truncate(detail.description, 1800); // 전문 → 매칭 정확도↑
+        p.summary = summarize(detail.description) || p.summary;
+        const purpose = extractPurpose(detail.description);
+        if (purpose) p.purpose = purpose;
+      }
+      if (detail.attachment) p.attachmentName = detail.attachment;
+    }),
+  );
+
   return programs;
+}
+
+/**
+ * 공고 한 건의 상세 페이지에서 본문·첨부 공고문명을 가져온다.
+ * 본문은 에디터 영역(div#new_ntxt_description)에, 첨부는 첫 파일 링크에 있다.
+ * 실패·미발견 시 빈 객체를 반환해 호출부가 목록 정보만으로 계속 동작하게 한다.
+ */
+async function fetchSbaDetail(
+  mid: string,
+): Promise<{ description?: string; attachment?: string }> {
+  const res = await fetch(`${HOST}/Pages/BusinessApply/PostingDetail.aspx?mid=${mid}`, {
+    next: { revalidate: 60 * 60 },
+    headers: { "User-Agent": "Mozilla/5.0", Accept: "text/html" },
+    signal: AbortSignal.timeout(8_000), // 보강용 — 짧게 끊는다
+  });
+  if (!res.ok) throw new Error(`SBA 상세 HTTP ${res.status}`);
+  const html = await res.text();
+
+  const description = cleanRich(divById(html, "new_ntxt_description"));
+  const att = html.match(/id="new_txt_fileupload_1"[^>]*>([\s\S]*?)<\/a>/);
+  const attachment = att ? cleanRich(att[1]) : "";
+
+  return {
+    description: description.length >= 10 ? description : undefined,
+    attachment: attachment || undefined,
+  };
+}
+
+/**
+ * 특정 id를 가진 <div>의 안쪽 HTML을 중첩 <div>까지 맞춰 잘라낸다.
+ * (본문 에디터 영역은 내부에 <p>·<div>가 섞여 있어 단순 정규식으로는 못 자른다)
+ */
+function divById(html: string, id: string): string {
+  const open = html.indexOf(`id="${id}"`);
+  if (open < 0) return "";
+  const gt = html.indexOf(">", open);
+  if (gt < 0) return "";
+  const re = /<\/?div\b[^>]*>/g;
+  re.lastIndex = gt + 1;
+  let depth = 1;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    depth += m[0].startsWith("</") ? -1 : 1;
+    if (depth === 0) return html.slice(gt + 1, m.index);
+  }
+  return html.slice(gt + 1, gt + 4000); // 닫는 태그 못 찾으면 앞부분만
+}
+
+/** 본문용 정제 — 태그 제거 + 숫자·기호 엔티티(①·· 등)까지 풀어 읽기 좋게 */
+function cleanRich(htmlFragment: string): string {
+  return htmlFragment
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&#(\d+);/g, (_, n) => safeCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => safeCodePoint(parseInt(n, 16)))
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;|&ldquo;|&rdquo;/gi, '"')
+    .replace(/&#39;|&apos;|&lsquo;|&rsquo;/gi, "'")
+    .replace(/&middot;/gi, "·")
+    .replace(/&hellip;/gi, "…")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** 잘못된 코드포인트로 인한 예외를 막아 빈 문자열로 대체 */
+function safeCodePoint(n: number): string {
+  try {
+    return String.fromCodePoint(n);
+  } catch {
+    return " ";
+  }
 }
 
 /** GridView 레코드를 행번호 0부터 훑어 공고로 변환 (접수 마감된 건 제외) */
