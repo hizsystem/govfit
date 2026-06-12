@@ -15,9 +15,9 @@ export const maxDuration = 30;
  * 추천 지원사업 목록을 반환한다.
  */
 export async function POST(request: Request) {
-  let company: CompanyProfile;
+  let raw: Partial<CompanyProfile>;
   try {
-    company = (await request.json()) as CompanyProfile;
+    raw = (await request.json()) as Partial<CompanyProfile>;
   } catch {
     return NextResponse.json(
       { error: "잘못된 요청 형식입니다." },
@@ -25,12 +25,27 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!company.industry || !company.region) {
+  if (!raw.industry || !raw.region) {
     return NextResponse.json(
       { error: "업종과 지역은 필수 입력입니다." },
       { status: 400 },
     );
   }
+
+  // 배열·숫자 필드가 빠진 요청이 와도 매칭 로직(.includes/.length 등)이
+  // 터지지 않도록 안전한 기본값으로 정규화한다. (필수값은 위에서 검증)
+  const company: CompanyProfile = {
+    name: raw.name ?? "",
+    preFounder: raw.preFounder ?? false,
+    industry: raw.industry,
+    region: raw.region,
+    businessAgeYears: Number(raw.businessAgeYears) || 0,
+    employeeCount: Number(raw.employeeCount) || 0,
+    annualRevenueEok: Number(raw.annualRevenueEok) || 0,
+    traits: Array.isArray(raw.traits) ? raw.traits : [],
+    interests: Array.isArray(raw.interests) ? raw.interests : [],
+    description: raw.description ?? "",
+  };
 
   // 0차: 지원사업 데이터 로드 (기업마당 실시간 → 실패 시 샘플 폴백)
   const { programs, source } = await loadPrograms();
