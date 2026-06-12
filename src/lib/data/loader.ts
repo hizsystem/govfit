@@ -7,6 +7,7 @@ import {
 import { fetchKstartupPrograms } from "@/lib/data/kstartup";
 import { fetchAtPrograms } from "@/lib/data/at";
 import { fetchFanfandaeroPrograms } from "@/lib/data/fanfandaero";
+import { fetchSbaPrograms } from "@/lib/data/sba";
 
 export interface LoadedPrograms {
   programs: SupportProgram[];
@@ -27,6 +28,7 @@ export async function loadPrograms(): Promise<LoadedPrograms> {
     fetchKstartupPrograms(),
     fetchAtPrograms(), // 글로벌aT 농식품 수출지원 공고 (HTML 파싱)
     fetchFanfandaeroPrograms(), // 판판대로(중소기업유통센터) 판로·유통 공고 (JSON)
+    fetchSbaPrograms(), // 서울경제진흥원(SBA) 사업공고 (HTML 파싱, 서울 소재 기업 대상)
   ]);
 
   const all: SupportProgram[] = [];
