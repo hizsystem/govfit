@@ -402,11 +402,13 @@ export default function Home() {
           disabled={loading}
           className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3.5 text-base font-bold text-white shadow-lg shadow-blue-600/20 transition hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "추천 분석 중…" : "맞춤 지원사업 추천받기"}
+          {loading ? "라이지가 찾는 중… 🔍" : "맞춤 지원사업 추천받기"}
         </button>
       </form>
 
-      {result && (
+      {loading && <LoadingExperience />}
+
+      {result && !loading && (
         <Results
           result={result}
           profile={submittedProfile}
@@ -423,6 +425,150 @@ export default function Home() {
       )}
       </main>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 로딩 경험 — 마스코트 '라이지' + 회전 안내문구
+// ---------------------------------------------------------------------------
+
+/** Brand Rise 마스코트 '라이지' — 무럭무럭 자라는 새싹 캐릭터 (인라인 SVG) */
+function RiseMascot({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 120 132"
+      className={className}
+      role="img"
+      aria-label="Brand Rise 마스코트 라이지"
+    >
+      <defs>
+        <linearGradient id="riseBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#6366f1" />
+        </linearGradient>
+        <linearGradient id="riseLeaf" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#4ade80" />
+          <stop offset="100%" stopColor="#22c55e" />
+        </linearGradient>
+      </defs>
+
+      {/* 바닥 그림자 */}
+      <ellipse cx="60" cy="124" rx="27" ry="5" fill="#000" opacity="0.12" />
+
+      {/* 새싹 (줄기 + 잎 2장) — 살랑살랑 */}
+      <g className="rise-wiggle" style={{ transformOrigin: "60px 42px" }}>
+        <path
+          d="M60 46 V22"
+          stroke="#16a34a"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <path d="M60 32 C49 19 35 22 33 32 C44 42 56 40 60 32 Z" fill="url(#riseLeaf)" />
+        <path d="M60 28 C71 13 87 16 89 28 C78 40 64 38 60 28 Z" fill="url(#riseLeaf)" />
+      </g>
+
+      {/* 팔 (만세 — 몸통 뒤에서 나옴) */}
+      <path
+        d="M26 74 C14 66 16 54 25 56"
+        stroke="url(#riseBody)"
+        strokeWidth="9"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M94 74 C106 66 104 54 95 56"
+        stroke="url(#riseBody)"
+        strokeWidth="9"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* 몸통 */}
+      <ellipse cx="60" cy="80" rx="40" ry="42" fill="url(#riseBody)" />
+
+      {/* 볼 */}
+      <circle cx="38" cy="88" r="7" fill="#fb7185" opacity="0.5" />
+      <circle cx="82" cy="88" r="7" fill="#fb7185" opacity="0.5" />
+
+      {/* 눈 — 깜빡임 */}
+      <g className="rise-blink" style={{ transformOrigin: "60px 76px" }}>
+        <circle cx="47" cy="76" r="8.5" fill="#fff" />
+        <circle cx="73" cy="76" r="8.5" fill="#fff" />
+        <circle cx="48" cy="77" r="4.4" fill="#1e293b" />
+        <circle cx="74" cy="77" r="4.4" fill="#1e293b" />
+        <circle cx="46" cy="74.5" r="1.6" fill="#fff" />
+        <circle cx="72" cy="74.5" r="1.6" fill="#fff" />
+      </g>
+
+      {/* 입 (방긋) */}
+      <path
+        d="M53 94 Q60 102 67 94"
+        stroke="#fff"
+        strokeWidth="3"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* 반짝임 */}
+      <path
+        d="M101 34 l1.8 4.8 4.8 1.8 -4.8 1.8 -1.8 4.8 -1.8 -4.8 -4.8 -1.8 4.8 -1.8 z"
+        fill="#fbbf24"
+      />
+    </svg>
+  );
+}
+
+/** 로딩 중 회전하는 안내 문구 — 라이지가 단계별로 무엇을 하는지 알려준다 */
+const LOADING_MESSAGES = [
+  "‘Brand Rise’가 당신의 회사에 가장 적합한 지원사업을 추리고 있어요 🔍",
+  "전국 공공기관 공고를 샅샅이 살펴보는 중이에요 📚",
+  "기업마당 · K-Startup · SBA 공고를 모으고 있어요 🗂️",
+  "조건에 딱 맞는 지원사업만 골라내는 중이에요 ✨",
+  "적합도를 점수로 매기는 중 — 거의 다 됐어요! 🎯",
+];
+
+function LoadingExperience() {
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(
+      () => setIdx((i) => (i + 1) % LOADING_MESSAGES.length),
+      2600,
+    );
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <section className="mt-10 flex flex-col items-center rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white px-6 py-12 text-center shadow-sm dark:border-gray-800 dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900">
+      <div className="rise-float">
+        <RiseMascot className="h-32 w-32 drop-shadow-md" />
+      </div>
+
+      {/* key가 바뀔 때마다 rise-pop 애니메이션 재생 */}
+      <p
+        key={idx}
+        className="rise-pop mt-6 max-w-md text-base font-semibold leading-relaxed text-gray-800 dark:text-gray-100"
+      >
+        {LOADING_MESSAGES[idx]}
+      </p>
+      <p className="mt-2 text-xs text-gray-400">
+        라이지가 열심히 찾는 중이에요. 길어도 15초면 끝나요 ☕
+      </p>
+
+      {/* 진행 점 — 현재 단계 강조 */}
+      <div className="mt-5 flex gap-1.5">
+        {LOADING_MESSAGES.map((_, i) => (
+          <span
+            key={i}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === idx
+                ? "w-6 bg-blue-600"
+                : "w-2 bg-blue-200 dark:bg-gray-700"
+            }`}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
