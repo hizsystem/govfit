@@ -153,7 +153,7 @@ export default function Home() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="Brand Rise 로고"
               className="h-9 w-9 rounded-full object-cover"
             />
