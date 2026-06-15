@@ -750,6 +750,24 @@ function Results({
         </TabButton>
       </div>
 
+      {/* 탭별 안내: 추천 5선은 개인화, 전체는 조건부합 전부라는 점을 명확히 */}
+      <p className="mb-3 rounded-lg bg-blue-50/70 px-3.5 py-2.5 text-xs leading-relaxed text-gray-600 dark:bg-blue-950/30 dark:text-gray-300">
+        {tab === "top" ? (
+          <>
+            <b className="text-blue-700 dark:text-blue-300">추천 5선</b>은 입력하신{" "}
+            <b>관심 지원분야·회사 소개</b>를 반영해 적합도가 높은 5건을 골라
+            보여줍니다. 관심 분야를 바꾸면 이 5선이 달라져요.
+          </>
+        ) : (
+          <>
+            <b className="text-blue-700 dark:text-blue-300">전체</b>는 조건(업종·지역·자격)에
+            부합하는 <b>모든 공고</b>입니다 — AI 맞춤 정렬이 아니라서 검색을 바꿔도
+            목록이 비슷하게 반복될 수 있어요. 실제 지원 가능 여부는 각 공고의{" "}
+            <b>신청 요건을 직접 확인</b>하세요.
+          </>
+        )}
+      </p>
+
       {/* 정렬: 두 탭 모두에서 사용 */}
       <div className="mb-3 flex items-center gap-2 text-sm">
         <span className="text-gray-400">정렬</span>

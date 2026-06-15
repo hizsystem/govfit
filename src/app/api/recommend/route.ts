@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import type { CompanyProfile, RecommendResponse } from "@/lib/types";
 import { loadPrograms } from "@/lib/data/loader";
 import { filterPrograms } from "@/lib/filter";
 import { scoreCandidates } from "@/lib/match";
+import { logSearch } from "@/lib/analytics";
 
 // 여러 공공 API(기업마당·K-Startup·aT·판판대로)를 병렬 호출하므로
 // Vercel 기본 함수 타임아웃보다 여유를 둔다. (각 fetch는 12초에 끊겨 폴백)
@@ -71,6 +72,15 @@ export async function POST(request: Request) {
         ? "입력하신 조건에 맞는 지원사업을 찾지 못했어요. 조건을 조금 넓혀보세요."
         : undefined,
   };
+
+  // 관리자 분석용 검색 로그 — 응답을 막지 않게 응답 전송 후 기록 (실패해도 무해)
+  after(() =>
+    logSearch(company, {
+      resultCount: recommendations.length,
+      aiUsed,
+      dataSource: source,
+    }),
+  );
 
   return NextResponse.json(body);
 }
