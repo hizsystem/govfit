@@ -27,7 +27,7 @@ export interface LoadedPrograms {
  */
 export const loadPrograms: () => Promise<LoadedPrograms> = unstable_cache(
   loadProgramsUncached,
-  ["govfit-programs-v1"],
+  ["govfit-programs-v2"],
   { revalidate: 60 * 60 },
 );
 
