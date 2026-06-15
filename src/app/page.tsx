@@ -15,6 +15,7 @@ import type {
 } from "@/lib/types";
 import { buildProposal, type ProposalFormat } from "@/lib/proposal";
 import { buildNewsletter, type CategoryGroup } from "@/lib/newsletter";
+import { track, getSessionId } from "@/lib/track";
 
 const EMPTY_PROFILE: CompanyProfile = {
   name: "",
@@ -59,6 +60,27 @@ export default function Home() {
     }
   }, []);
 
+  // 방문 기록 + 체류시간: 마운트 시 page_view, 첫 이탈(탭 숨김/종료) 시 session_end(초)
+  useEffect(() => {
+    track("page_view");
+    const start = Date.now();
+    let sent = false;
+    const end = () => {
+      if (sent) return;
+      sent = true;
+      track("session_end", { value: Math.round((Date.now() - start) / 1000) });
+    };
+    const onVis = () => {
+      if (document.visibilityState === "hidden") end();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", end);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", end);
+    };
+  }, []);
+
   function persist(next: Record<string, Recommendation>) {
     setBookmarks(next);
     try {
@@ -71,9 +93,15 @@ export default function Home() {
   function toggleBookmark(rec: Recommendation) {
     const id = rec.program.id;
     const next = { ...bookmarks };
+    const adding = !next[id];
     if (next[id]) delete next[id];
     else next[id] = rec;
     persist(next);
+    track("bookmark", {
+      programId: id,
+      programTitle: rec.program.title,
+      value: adding ? "on" : "off",
+    });
   }
 
   const savedList = Object.values(bookmarks);
@@ -126,7 +154,7 @@ export default function Home() {
       const res = await fetch("/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify({ ...profile, sessionId: getSessionId() }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -1386,6 +1414,12 @@ function RecCard({
             href={program.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              track("program_click", {
+                programId: program.id,
+                programTitle: program.title,
+              })
+            }
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
           >
             📄 공고 상세 보기 <span aria-hidden>↗</span>

@@ -4,6 +4,7 @@ interface SearchMeta {
   resultCount: number;
   aiUsed: boolean;
   dataSource: string;
+  sessionId?: string;
 }
 
 /**
@@ -22,7 +23,9 @@ export async function logSearch(
   if (!url) return;
 
   const row = {
+    kind: "search",
     ts: new Date().toISOString(),
+    sessionId: meta.sessionId ?? "",
     preFounder: company.preFounder,
     industry: company.industry,
     region: company.region,

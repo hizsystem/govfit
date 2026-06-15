@@ -16,9 +16,11 @@ export const maxDuration = 30;
  * 추천 지원사업 목록을 반환한다.
  */
 export async function POST(request: Request) {
-  let raw: Partial<CompanyProfile>;
+  let raw: Partial<CompanyProfile> & { sessionId?: string };
   try {
-    raw = (await request.json()) as Partial<CompanyProfile>;
+    raw = (await request.json()) as Partial<CompanyProfile> & {
+      sessionId?: string;
+    };
   } catch {
     return NextResponse.json(
       { error: "잘못된 요청 형식입니다." },
@@ -79,6 +81,7 @@ export async function POST(request: Request) {
       resultCount: recommendations.length,
       aiUsed,
       dataSource: source,
+      sessionId: typeof raw.sessionId === "string" ? raw.sessionId : undefined,
     }),
   );
 
