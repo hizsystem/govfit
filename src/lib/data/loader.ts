@@ -9,6 +9,8 @@ import { fetchKstartupPrograms } from "@/lib/data/kstartup";
 import { fetchAtPrograms } from "@/lib/data/at";
 import { fetchFanfandaeroPrograms } from "@/lib/data/fanfandaero";
 import { fetchSbaPrograms } from "@/lib/data/sba";
+import { fetchGov24Programs } from "@/lib/data/gov24";
+import { fetchMsitPrograms } from "@/lib/data/msit";
 
 export interface LoadedPrograms {
   programs: SupportProgram[];
@@ -27,7 +29,7 @@ export interface LoadedPrograms {
  */
 export const loadPrograms: () => Promise<LoadedPrograms> = unstable_cache(
   loadProgramsUncached,
-  ["govfit-programs-v3"],
+  ["govfit-programs-v4"],
   { revalidate: 60 * 60 },
 );
 
@@ -40,6 +42,8 @@ async function loadProgramsUncached(): Promise<LoadedPrograms> {
     fetchAtPrograms(), // 글로벌aT 농식품 수출지원 공고 (HTML 파싱)
     fetchFanfandaeroPrograms(), // 판판대로(중소기업유통센터) 판로·유통 공고 (JSON)
     fetchSbaPrograms(), // 서울경제진흥원(SBA) 사업공고 (HTML 파싱, 서울 소재 기업 대상)
+    fetchGov24Programs(), // 보조금24(행안부) 정부·지자체 공공서비스 중 기업 대상
+    fetchMsitPrograms(), // 과학기술정보통신부 사업공고 (R&D·공모, 조달성 제외)
   ]);
 
   const all: SupportProgram[] = [];
