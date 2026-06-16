@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CATEGORIES,
   INDUSTRIES,
@@ -1171,18 +1171,49 @@ function SavedView({
   isSaved: (id: string) => boolean;
   onToggleSave: (rec: Recommendation) => void;
 }) {
+  // 목록 / 캘린더 보기 전환. 마감일을 한눈에 보려는 게 주 목적이라 캘린더를 기본으로.
+  const [mode, setMode] = useState<"calendar" | "list">("calendar");
+
   return (
     <section>
-      <h2 className="mb-4 text-xl font-bold">
-        🔖 관심공고{" "}
-        <span className="text-gray-400">({savedList.length}건)</span>
-      </h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-xl font-bold">
+          🔖 관심공고{" "}
+          <span className="text-gray-400">({savedList.length}건)</span>
+        </h2>
+        {savedList.length > 0 && (
+          <div className="flex shrink-0 rounded-lg border border-gray-300 p-0.5 text-xs font-semibold dark:border-gray-700">
+            {(["calendar", "list"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className={`rounded-md px-3 py-1.5 transition ${
+                  mode === m
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                }`}
+              >
+                {m === "calendar" ? "📅 캘린더" : "📋 목록"}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {savedList.length === 0 ? (
         <p className="rounded-xl bg-gray-50 px-4 py-10 text-center text-sm text-gray-500 dark:bg-gray-800/60">
           아직 담은 관심공고가 없어요.
           <br />
           추천 결과에서 <b>관심공고 담기</b>를 눌러 모아보세요.
         </p>
+      ) : mode === "calendar" ? (
+        <SavedCalendar
+          savedList={savedList}
+          profile={profile}
+          isSaved={isSaved}
+          onToggleSave={onToggleSave}
+        />
       ) : (
         <ul className="space-y-4">
           {savedList.map((rec, i) => (
@@ -1198,6 +1229,243 @@ function SavedView({
         </ul>
       )}
     </section>
+  );
+}
+
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"] as const;
+
+/** "YYYY-MM-DD" → {y,m,d} (로컬 타임존 파싱 이슈 없이 문자열로 분해) */
+function parseYmd(s?: string): { y: number; m: number; d: number } | null {
+  const m = (s ?? "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return null;
+  return { y: Number(m[1]), m: Number(m[2]), d: Number(m[3]) };
+}
+
+function ymdKey(y: number, m: number, d: number): string {
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
+/**
+ * 찜한 공고를 월간 캘린더에 마감일(deadlineEnd) 기준으로 배치한다.
+ * - 날짜 칸은 그날 마감인 공고 수를 가장 임박한 색으로 표시
+ * - 날짜를 누르면 그날 마감 공고를 기존 RecCard로 펼쳐 보여줌
+ * - 마감일이 없는(상시/미정) 공고는 캘린더 아래 별도 목록으로
+ */
+function SavedCalendar({
+  savedList,
+  profile,
+  isSaved,
+  onToggleSave,
+}: {
+  savedList: Recommendation[];
+  profile: CompanyProfile;
+  isSaved: (id: string) => boolean;
+  onToggleSave: (rec: Recommendation) => void;
+}) {
+  // 마감일별 그룹 + 마감일 미정 분리
+  const { byDate, noDeadline } = useMemo(() => {
+    const byDate = new Map<string, Recommendation[]>();
+    const noDeadline: Recommendation[] = [];
+    for (const rec of savedList) {
+      const p = parseYmd(rec.program.deadlineEnd);
+      if (!p) {
+        noDeadline.push(rec);
+        continue;
+      }
+      const key = ymdKey(p.y, p.m, p.d);
+      const arr = byDate.get(key) ?? [];
+      arr.push(rec);
+      byDate.set(key, arr);
+    }
+    return { byDate, noDeadline };
+  }, [savedList]);
+
+  // 초기 표시 월: 마감일이 가장 가까운(또는 가장 이른) 찜 공고가 있는 달.
+  // 없으면 오늘 달. (마운트 시 한 번만 계산)
+  const [cursor, setCursor] = useState(() => {
+    const keys = Array.from(byDate.keys()).sort();
+    const now = new Date();
+    const todayKey = ymdKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    const upcoming = keys.find((k) => k >= todayKey) ?? keys[0];
+    const base = parseYmd(upcoming);
+    return base
+      ? { y: base.y, m: base.m }
+      : { y: now.getFullYear(), m: now.getMonth() + 1 };
+  });
+
+  const [selected, setSelected] = useState<string | null>(null);
+
+  // 달력 그리드: 1일의 요일만큼 앞을 비우고, 그 달 일수만큼 채운다.
+  const cells = useMemo(() => {
+    const firstWeekday = new Date(cursor.y, cursor.m - 1, 1).getDay();
+    const daysInMonth = new Date(cursor.y, cursor.m, 0).getDate();
+    const out: (number | null)[] = [];
+    for (let i = 0; i < firstWeekday; i++) out.push(null);
+    for (let d = 1; d <= daysInMonth; d++) out.push(d);
+    while (out.length % 7 !== 0) out.push(null);
+    return out;
+  }, [cursor]);
+
+  const now = new Date();
+  const todayKey = ymdKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+
+  function shiftMonth(delta: number) {
+    setSelected(null);
+    setCursor((c) => {
+      const m0 = c.m - 1 + delta; // 0-indexed 월로 계산
+      const y = c.y + Math.floor(m0 / 12);
+      const m = ((m0 % 12) + 12) % 12;
+      return { y, m: m + 1 };
+    });
+  }
+
+  const selectedRecs = selected ? (byDate.get(selected) ?? []) : [];
+
+  // 이번 달 마감 공고 수 (안내용)
+  const monthPrefix = `${cursor.y}-${String(cursor.m).padStart(2, "0")}`;
+  const monthCount = Array.from(byDate.entries())
+    .filter(([k]) => k.startsWith(monthPrefix))
+    .reduce((n, [, recs]) => n + recs.length, 0);
+
+  return (
+    <div>
+      {/* 월 네비게이션 */}
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => shiftMonth(-1)}
+          className="rounded-lg px-3 py-1.5 text-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          aria-label="이전 달"
+        >
+          ‹
+        </button>
+        <div className="text-center">
+          <div className="text-lg font-bold">
+            {cursor.y}년 {cursor.m}월
+          </div>
+          <div className="text-xs text-gray-400">이 달 마감 {monthCount}건</div>
+        </div>
+        <button
+          type="button"
+          onClick={() => shiftMonth(1)}
+          className="rounded-lg px-3 py-1.5 text-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          aria-label="다음 달"
+        >
+          ›
+        </button>
+      </div>
+
+      {/* 요일 헤더 */}
+      <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-400">
+        {WEEKDAYS.map((w, i) => (
+          <div
+            key={w}
+            className={`py-1 ${i === 0 ? "text-red-400" : i === 6 ? "text-blue-400" : ""}`}
+          >
+            {w}
+          </div>
+        ))}
+      </div>
+
+      {/* 날짜 그리드 */}
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((d, i) => {
+          if (d === null) return <div key={`e${i}`} />;
+          const key = ymdKey(cursor.y, cursor.m, d);
+          const recs = byDate.get(key);
+          const count = recs?.length ?? 0;
+          // 칸 색조: 그날 공고 중 가장 임박한 것 기준
+          const diffs = (recs ?? [])
+            .map((r) => ddayDiff(r.program.deadlineEnd!))
+            .filter((n): n is number => n !== null);
+          const minDiff = diffs.length ? Math.min(...diffs) : null;
+          const tone =
+            minDiff === null
+              ? ""
+              : minDiff < 0
+                ? "bg-gray-100 text-gray-400 dark:bg-gray-800"
+                : minDiff <= 7
+                  ? "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300"
+                  : minDiff <= 14
+                    ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                    : "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300";
+          const isToday = key === todayKey;
+          const isSelected = key === selected;
+          return (
+            <button
+              key={key}
+              type="button"
+              disabled={count === 0}
+              onClick={() => setSelected(isSelected ? null : key)}
+              className={`relative flex aspect-square flex-col items-center justify-center rounded-lg text-sm transition ${
+                isSelected
+                  ? "ring-2 ring-blue-500"
+                  : count > 0
+                    ? "hover:ring-2 hover:ring-blue-300"
+                    : "cursor-default"
+              } ${count > 0 ? tone : "text-gray-500 dark:text-gray-400"} ${
+                isToday ? "font-extrabold underline decoration-2 underline-offset-2" : ""
+              }`}
+            >
+              <span>{d}</span>
+              {count > 0 && (
+                <span className="mt-0.5 text-[10px] font-bold leading-none">
+                  {count}건
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="mt-2 text-center text-xs text-gray-400">
+        날짜를 누르면 그날 마감인 관심공고를 볼 수 있어요.
+      </p>
+
+      {/* 선택한 날짜의 마감 공고 */}
+      {selected && selectedRecs.length > 0 && (
+        <div className="mt-5">
+          <h3 className="mb-3 text-sm font-bold text-gray-700 dark:text-gray-200">
+            🗓 {Number(selected.slice(5, 7))}월 {Number(selected.slice(8, 10))}일 마감{" "}
+            <span className="text-gray-400">({selectedRecs.length}건)</span>
+          </h3>
+          <ul className="space-y-4">
+            {selectedRecs.map((rec, i) => (
+              <RecCard
+                key={rec.program.id}
+                rec={rec}
+                profile={profile}
+                index={i + 1}
+                saved={isSaved(rec.program.id)}
+                onToggleSave={() => onToggleSave(rec)}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 마감일 미정/상시 공고 */}
+      {noDeadline.length > 0 && (
+        <div className="mt-6 border-t border-gray-200 pt-5 dark:border-gray-800">
+          <h3 className="mb-3 text-sm font-bold text-gray-700 dark:text-gray-200">
+            📌 마감일 미정 · 상시{" "}
+            <span className="text-gray-400">({noDeadline.length}건)</span>
+          </h3>
+          <ul className="space-y-4">
+            {noDeadline.map((rec, i) => (
+              <RecCard
+                key={rec.program.id}
+                rec={rec}
+                profile={profile}
+                index={i + 1}
+                saved={isSaved(rec.program.id)}
+                onToggleSave={() => onToggleSave(rec)}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 
