@@ -71,9 +71,9 @@ export default function Home() {
   const [bookmarks, setBookmarks] = useState<Record<string, Recommendation>>({});
   // 마이페이지 프로필 (디지털 명함 등)
   const [myProfile, setMyProfile] = useState<MyProfile>(EMPTY_MYPROFILE);
-  // 화면 전환: 검색 / 관심공고 / 공고 사이트 모음 / 뉴스레터 / 마이페이지
+  // 화면 전환: 검색 / 관심공고 / 공고 사이트 모음 / 뉴스레터 / 마이페이지 / 소개
   const [view, setView] = useState<
-    "search" | "saved" | "sites" | "newsletter" | "mypage"
+    "search" | "saved" | "sites" | "newsletter" | "mypage" | "intro"
   >("search");
   // 관심공고 화면 진입 시 초기 보기 모드 (마이페이지 타일에서 캘린더/목록 지정)
   const [savedMode, setSavedMode] = useState<"calendar" | "list">("calendar");
@@ -221,9 +221,9 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
           <button
             type="button"
-            onClick={() => setView("search")}
+            onClick={() => setView("intro")}
             className="flex items-center gap-2"
-            aria-label="홈"
+            aria-label="브랜드라이즈 소개"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -287,7 +287,7 @@ export default function Home() {
       </nav>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
-        {view !== "mypage" && (
+        {view !== "mypage" && view !== "intro" && (
         <header className="mb-8 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-6 sm:p-8 dark:border-gray-800 dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
             Brand Rise <span className="text-blue-600">정부지원사업 추천</span>
@@ -299,7 +299,13 @@ export default function Home() {
         </header>
         )}
 
-      {view === "mypage" ? (
+      {view === "intro" ? (
+        <IntroView
+          onStart={() => setView("search")}
+          onOpenMypage={() => setView("mypage")}
+          onOpenNewsletter={() => setView("newsletter")}
+        />
+      ) : view === "mypage" ? (
         <MyPageView
           myProfile={myProfile}
           onSaveProfile={saveMyProfile}
@@ -1231,6 +1237,240 @@ function SitesView() {
         사이트는 순차 연동 예정입니다.
       </p>
     </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 소개(랜딩) 페이지 — 로고 클릭 시 표시
+// ---------------------------------------------------------------------------
+
+const INTRO_FEATURES = [
+  {
+    icon: "🎯",
+    title: "맞춤 적합도 매칭",
+    desc: "업종·지역·업력·관심분야를 반영해 조건에 맞는 지원사업을 골라 적합도 점수로 정렬해드려요.",
+  },
+  {
+    icon: "🔄",
+    title: "실시간 공고 수집",
+    desc: "기업마당·K-Startup·글로벌aT·판판대로·서울경제진흥원 등 공공 데이터를 자동으로 모아 중복 없이 보여줘요.",
+  },
+  {
+    icon: "📅",
+    title: "관심공고 & 마감 캘린더",
+    desc: "마음에 드는 공고를 담아두고, 신청 마감일을 월간 캘린더로 한눈에 관리하세요.",
+  },
+  {
+    icon: "📝",
+    title: "사업계획서 초안",
+    desc: "공고와 회사 정보를 바탕으로 사업계획서 초안을 자동으로 만들어 신청 준비를 도와요.",
+  },
+  {
+    icon: "💳",
+    title: "디지털 명함",
+    desc: "마이페이지에서 나만의 디지털 명함을 만들어 연락처 저장·공유까지 한 번에.",
+  },
+  {
+    icon: "📰",
+    title: "뉴스레터",
+    desc: "분야별 주요 공고를 모아 보기 쉽게 정리해드려요.",
+  },
+] as const;
+
+const INTRO_STEPS = [
+  {
+    no: "01",
+    title: "회사 정보 입력",
+    desc: "업종·지역·업력 등 기본 정보와 관심 분야를 입력해요. 예비창업자도 OK.",
+  },
+  {
+    no: "02",
+    title: "적합도 추천 받기",
+    desc: "조건에 맞는 지원사업을 골라 적합도 점수와 추천 이유까지 보여드려요.",
+  },
+  {
+    no: "03",
+    title: "담고 · 관리하고 · 신청",
+    desc: "관심공고를 담아 마감 캘린더로 챙기고, 사업계획서 초안으로 신청을 준비하세요.",
+  },
+] as const;
+
+function IntroView({
+  onStart,
+  onOpenMypage,
+  onOpenNewsletter,
+}: {
+  onStart: () => void;
+  onOpenMypage: () => void;
+  onOpenNewsletter: () => void;
+}) {
+  return (
+    <div className="space-y-14 pb-10">
+      {/* 히어로 */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 px-6 py-14 text-center text-white shadow-xl sm:px-10 sm:py-20">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-violet-300/20 blur-3xl" />
+
+        <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Brand Rise 로고"
+            className="mx-auto mb-5 h-16 w-16 rounded-2xl object-cover shadow-lg"
+          />
+          <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
+            정부지원사업 매칭 플랫폼
+          </span>
+          <h1 className="mt-4 text-3xl font-extrabold leading-tight sm:text-5xl">
+            흩어진 정부지원사업,
+            <br />
+            <span className="text-blue-100">내게 맞는 것만 한 곳에서</span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
+            수많은 공공기관에 흩어진 지원사업 공고를 실시간으로 모아, 우리 회사
+            조건에 맞는 사업만 골라 적합도 순으로 추천해드립니다.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={onStart}
+              className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50 sm:text-base"
+            >
+              🔍 내게 맞는 지원사업 찾기
+            </button>
+            <button
+              type="button"
+              onClick={onOpenMypage}
+              className="rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20 sm:text-base"
+            >
+              👤 마이페이지
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 신뢰 지표 */}
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[
+          { big: "5+", label: "공공 데이터 소스 연동", sub: "기업마당·K-Startup 등" },
+          { big: "실시간", label: "자동 공고 수집·갱신", sub: "중복 제거 후 최신 유지" },
+          { big: "맞춤", label: "조건 기반 적합도 점수", sub: "추천 이유까지 제공" },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900"
+          >
+            <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">
+              {s.big}
+            </div>
+            <div className="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100">
+              {s.label}
+            </div>
+            <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              {s.sub}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* 주요 기능 */}
+      <section>
+        <div className="mb-7 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
+            이런 기능이 있어요
+          </h2>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            찾기부터 관리·신청 준비까지, 한 곳에서 끝내세요.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {INTRO_FEATURES.map((f) => (
+            <div
+              key={f.title}
+              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+            >
+              <div className="text-3xl">{f.icon}</div>
+              <h3 className="mt-3 text-base font-bold text-gray-900 dark:text-gray-100">
+                {f.title}
+              </h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                {f.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 이용 방법 */}
+      <section className="rounded-3xl bg-gray-50 px-6 py-12 dark:bg-gray-800/40 sm:px-10">
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
+            3단계면 충분해요
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {INTRO_STEPS.map((s) => (
+            <div key={s.no} className="text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-extrabold text-white">
+                {s.no}
+              </div>
+              <h3 className="mt-4 text-base font-bold text-gray-900 dark:text-gray-100">
+                {s.title}
+              </h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                {s.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 마무리 CTA */}
+      <section className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 px-6 py-12 text-center text-white shadow-lg sm:px-10">
+        <h2 className="text-2xl font-bold sm:text-3xl">
+          우리 회사에 맞는 지원사업, 지금 확인하세요
+        </h2>
+        <p className="mt-2 text-sm text-blue-100">
+          회원가입 없이 바로 시작할 수 있어요.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={onStart}
+            className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50"
+          >
+            🔍 지금 추천받기
+          </button>
+          <button
+            type="button"
+            onClick={onOpenNewsletter}
+            className="rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
+          >
+            📰 뉴스레터 보기
+          </button>
+        </div>
+      </section>
+
+      {/* 푸터 */}
+      <footer className="border-t border-gray-200 pt-8 text-center text-xs text-gray-400 dark:border-gray-800">
+        <div className="flex items-center justify-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Brand Rise"
+            className="h-6 w-6 rounded-md object-cover"
+          />
+          <span className="font-bold text-gray-600 dark:text-gray-300">
+            Brand Rise
+          </span>
+        </div>
+        <p className="mt-2">정부지원사업 추천 플랫폼 · 브랜드라이즈</p>
+        <p className="mt-1">
+          공공 데이터(기업마당·K-Startup 등)를 활용하며, 실제 신청·자격 요건은 각
+          공고 원문을 확인하세요.
+        </p>
+      </footer>
+    </div>
   );
 }
 
