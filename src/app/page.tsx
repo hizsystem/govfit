@@ -398,9 +398,9 @@ export default function Home() {
             onToggle={(v) => toggleArray("interests", v as Category)}
           />
           <p className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-relaxed text-gray-600 dark:bg-blue-950/30 dark:text-gray-400">
-            💡 선택한 분야는 회사 소개처럼 <b>적합도 점수에 반영</b>돼요. 다만 선택한
-            분야만 따로 보여주지는 않아요 — 분야 밖에도 잘 맞는 좋은 사업이 있을 수
-            있어, 놓치지 않도록 조건에 맞는 공고는 모두 보여드립니다.
+            💡 선택한 분야는 회사 소개처럼 <b>적합도 점수에 반영</b>돼요. 분야 밖에도
+            잘 맞는 좋은 사업이 있을 수 있어, 놓치지 않도록 조건에 맞는 공고는 모두
+            보여드립니다.
           </p>
         </Field>
 
