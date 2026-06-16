@@ -43,10 +43,11 @@ interface BizinfoItem {
 
 /**
  * 기업마당 실시간 공고를 불러온다.
- * @param count 조회 건수 (기본 300, 0이면 전체)
+ * @param count 조회 건수 (기본 2000). 현재 오픈 공고 전량(~1,500건)을 덮을 만큼
+ *   넉넉히 요청한다. 서버는 보유분만 반환하므로 과다 요청해도 응답은 실제 건수다.
  * @throws 키 미설정·HTTP 오류·빈 응답 시
  */
-export async function fetchBizinfoPrograms(count = 300): Promise<SupportProgram[]> {
+export async function fetchBizinfoPrograms(count = 2000): Promise<SupportProgram[]> {
   const programs = await fetchBizinfoBy("", count);
   if (programs.length === 0) {
     throw new Error("기업마당 응답에 공고가 없습니다.");

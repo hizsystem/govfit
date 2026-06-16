@@ -20,8 +20,6 @@ const MODEL = process.env.GOVFIT_MODEL || "claude-haiku-4-5";
 
 /** AI에 넘길 최대 후보 수 (실시간 데이터는 후보가 수백 건일 수 있어 상위만 추림) */
 const AI_CANDIDATE_LIMIT = 25;
-/** 화면 "전체" 탭으로 반환할 최대 건수 (조건에 맞는 것 다 보여주되 과도한 페이로드 방지) */
-const MAX_RETURN = 100;
 
 interface ScoreResult {
   recommendations: Recommendation[];
@@ -45,7 +43,8 @@ export async function scoreCandidates(
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return { recommendations: ranked.slice(0, MAX_RETURN), aiUsed: false };
+    // 상한 없음: 조건(규칙 필터)을 통과한 후보는 전부 반환한다.
+    return { recommendations: ranked, aiUsed: false };
   }
 
   try {
@@ -57,10 +56,10 @@ export async function scoreCandidates(
       return ai ? { ...r, score: clamp(ai.score), reason: ai.reason } : r;
     });
     merged.sort((a, b) => b.score - a.score);
-    return { recommendations: merged.slice(0, MAX_RETURN), aiUsed: true };
+    return { recommendations: merged, aiUsed: true };
   } catch (err) {
     console.error("[match] AI 호출 실패, 규칙 기반으로 폴백합니다:", err);
-    return { recommendations: ranked.slice(0, MAX_RETURN), aiUsed: false };
+    return { recommendations: ranked, aiUsed: false };
   }
 }
 

@@ -49,15 +49,21 @@ interface KStartupItem {
 
 /**
  * K-Startup 실시간 공고를 불러온다 (모집 진행 중인 것만).
+ *
+ * 서버측 조건검색(`cond[rcrt_prgs_yn::EQ]=Y`)으로 모집중 공고만 받는다.
+ * 전체 공고는 약 2.9만 건(마감 포함)이라 페이지 앞쪽만 받으면 활성 공고를
+ * 일부만 건졌었다. 조건검색으로 활성 공고(~300여 건) 전량을 한 번에 가져온다.
+ * @param count 조회 건수 (기본 500). 활성 공고 전량을 덮을 만큼 넉넉히 요청.
  * @throws 키 미설정·HTTP 오류·빈 응답 시
  */
-export async function fetchKstartupPrograms(count = 300): Promise<SupportProgram[]> {
+export async function fetchKstartupPrograms(count = 500): Promise<SupportProgram[]> {
   const key = process.env.KSTARTUP_API_KEY;
   if (!key) throw new Error("KSTARTUP_API_KEY 미설정");
 
   const url =
     `${ENDPOINT}?serviceKey=${encodeURIComponent(key)}` +
-    `&page=1&perPage=${count}&returnType=json`;
+    `&page=1&perPage=${count}&returnType=json` +
+    `&cond[rcrt_prgs_yn::EQ]=Y`; // 모집중만 서버에서 필터
 
   const res = await fetch(url, {
     next: { revalidate: 60 * 60 }, // 1시간마다 최신 공고 갱신
