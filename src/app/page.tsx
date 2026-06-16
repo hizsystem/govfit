@@ -77,6 +77,10 @@ export default function Home() {
   >("search");
   // 관심공고 화면 진입 시 초기 보기 모드 (마이페이지 타일에서 캘린더/목록 지정)
   const [savedMode, setSavedMode] = useState<"calendar" | "list">("calendar");
+  // 연동된 지원사업 총 개수/소스 수 (소개·헤더에 표시)
+  const [stats, setStats] = useState<{ total: number; sourceCount: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     // localStorage는 클라이언트에만 있으므로 마운트 후 읽어 하이드레이션 불일치를 피한다.
@@ -90,6 +94,22 @@ export default function Home() {
     } catch {
       /* 저장된 값이 깨졌으면 무시 */
     }
+  }, []);
+
+  // 연동 지원사업 총 개수 로드 (캐시된 /api/stats — 실패해도 무시)
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/stats")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (alive && d && typeof d.total === "number") {
+          setStats({ total: d.total, sourceCount: d.sourceCount ?? 0 });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, []);
 
   function saveMyProfile(next: MyProfile) {
@@ -296,11 +316,17 @@ export default function Home() {
             회사 정보를 입력하면 조건에 맞는 지원사업을 골라 AI가 적합도를
             매겨드려요.
           </p>
+          {stats && stats.total > 0 && (
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-600/10 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-400/10 dark:text-blue-300">
+              📡 현재 <b>{stats.total.toLocaleString()}개</b>의 지원사업 실시간 연동 중
+            </p>
+          )}
         </header>
         )}
 
       {view === "intro" ? (
         <IntroView
+          stats={stats}
           onStart={() => setView("search")}
           onOpenMypage={() => setView("mypage")}
           onOpenNewsletter={() => setView("newsletter")}
@@ -1296,10 +1322,12 @@ const INTRO_STEPS = [
 ] as const;
 
 function IntroView({
+  stats,
   onStart,
   onOpenMypage,
   onOpenNewsletter,
 }: {
+  stats: { total: number; sourceCount: number } | null;
   onStart: () => void;
   onOpenMypage: () => void;
   onOpenNewsletter: () => void;
@@ -1346,14 +1374,28 @@ function IntroView({
               👤 마이페이지
             </button>
           </div>
+          {stats && stats.total > 0 && (
+            <p className="mt-6 text-sm text-blue-100">
+              📡 지금까지 <b className="text-white">{stats.total.toLocaleString()}개</b>의
+              지원사업을 연동했어요
+            </p>
+          )}
         </div>
       </section>
 
       {/* 신뢰 지표 */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[
-          { big: "5+", label: "공공 데이터 소스 연동", sub: "기업마당·K-Startup 등" },
-          { big: "실시간", label: "자동 공고 수집·갱신", sub: "중복 제거 후 최신 유지" },
+          {
+            big: stats && stats.total > 0 ? `${stats.total.toLocaleString()}건` : "실시간",
+            label: "연동된 지원사업",
+            sub: "중복 제거 후 최신 유지",
+          },
+          {
+            big: stats && stats.sourceCount > 0 ? `${stats.sourceCount}곳` : "5+",
+            label: "공공 데이터 소스",
+            sub: "기업마당·K-Startup·보조금24 등",
+          },
           { big: "맞춤", label: "조건 기반 적합도 점수", sub: "추천 이유까지 제공" },
         ].map((s) => (
           <div
