@@ -788,26 +788,36 @@ function Results({
 }) {
   const { recommendations, aiUsed, dataSource, notice } = result;
   const isLive = dataSource === "bizinfo";
-  const [tab, setTab] = useState<"top" | "all">("top");
+  const [tab, setTab] = useState<"top" | "interest" | "all">("top");
   const [sort, setSort] = useState<SortKey>("score");
   const [page, setPage] = useState(1);
   const PER_PAGE = 15;
 
-  // 추천 5선 = 적합도 상위 5개, 전체 = 조건부합 전부. 둘 다 선택한 기준으로 정렬.
+  // 관심분야 딱맞춤 = 조건 부합(자격 통과) 추천 중 카테고리가 관심 지원분야에 속하는 것.
+  const interestList = recommendations.filter((r) =>
+    profile.interests.includes(r.program.category),
+  );
+
+  // 추천 5선 = 적합도 상위 5개 / 관심분야 = 관심분야 딱맞춤 / 전체 = 조건부합 전부.
   const baseList =
-    tab === "top" ? recommendations.slice(0, 5) : recommendations;
+    tab === "top"
+      ? recommendations.slice(0, 5)
+      : tab === "interest"
+        ? interestList
+        : recommendations;
   const list = sortRecs(baseList, sort);
 
-  // 전체 탭만 15개씩 페이지네이션
-  const totalPages =
-    tab === "all" ? Math.max(1, Math.ceil(list.length / PER_PAGE)) : 1;
+  // 추천 5선 외 탭은 15개씩 페이지네이션
+  const paginated = tab !== "top";
+  const totalPages = paginated
+    ? Math.max(1, Math.ceil(list.length / PER_PAGE))
+    : 1;
   const safePage = Math.min(page, totalPages);
-  const pageList =
-    tab === "all"
-      ? list.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
-      : list;
+  const pageList = paginated
+    ? list.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+    : list;
 
-  function changeTab(t: "top" | "all") {
+  function changeTab(t: "top" | "interest" | "all") {
     setTab(t);
     setPage(1);
   }
@@ -874,10 +884,16 @@ function Results({
         </div>
       </div>
 
-      {/* 탭: 추천 5선 / 전체 */}
-      <div className="mb-3 flex gap-2">
+      {/* 탭: 추천 5선 / 관심분야 / 전체 */}
+      <div className="mb-3 flex flex-wrap gap-2">
         <TabButton active={tab === "top"} onClick={() => changeTab("top")}>
           ⭐ 추천 5선
+        </TabButton>
+        <TabButton
+          active={tab === "interest"}
+          onClick={() => changeTab("interest")}
+        >
+          🎯 관심분야 {interestList.length}건
         </TabButton>
         <TabButton active={tab === "all"} onClick={() => changeTab("all")}>
           전체 {recommendations.length}건
@@ -891,6 +907,14 @@ function Results({
             <b className="text-blue-700 dark:text-blue-300">추천 5선</b>은 입력하신{" "}
             <b>관심 지원분야·회사 소개</b>를 반영해 적합도가 높은 5건을 골라
             보여줍니다. 관심 분야를 바꾸면 이 5선이 달라져요.
+          </>
+        ) : tab === "interest" ? (
+          <>
+            <b className="text-blue-700 dark:text-blue-300">관심분야 딱맞춤</b>은
+            조건(업종·지역·자격)에 <b>부합해 지원 가능한 공고 중</b>, 선택하신{" "}
+            <b>관심 지원분야에 해당하는 것만</b> 모았습니다.
+            {profile.interests.length === 0 &&
+              " 관심 지원분야를 선택하면 여기에 모여요."}
           </>
         ) : (
           <>
@@ -914,29 +938,35 @@ function Results({
           <option value="deadlineAsc">마감 임박순 (적게 남은)</option>
           <option value="deadlineDesc">마감 여유순 (많이 남은)</option>
         </select>
-        {tab === "all" && (
+        {paginated && (
           <span className="ml-auto text-xs text-gray-400">
             {safePage} / {totalPages} 페이지
           </span>
         )}
       </div>
 
-      <ul className="space-y-4">
-        {pageList.map((rec, i) => (
-          <RecCard
-            key={rec.program.id}
-            rec={rec}
-            profile={profile}
-            index={
-              tab === "all" ? (safePage - 1) * PER_PAGE + i + 1 : i + 1
-            }
-            saved={isSaved(rec.program.id)}
-            onToggleSave={() => onToggleSave(rec)}
-          />
-        ))}
-      </ul>
+      {pageList.length === 0 ? (
+        <p className="rounded-xl bg-gray-50 px-4 py-10 text-center text-sm text-gray-500 dark:bg-gray-800/60">
+          {tab === "interest"
+            ? "선택한 관심 지원분야에 해당하는 지원 가능 공고가 아직 없어요. 관심 분야를 넓혀보거나 전체 탭을 확인해보세요."
+            : "표시할 공고가 없습니다."}
+        </p>
+      ) : (
+        <ul className="space-y-4">
+          {pageList.map((rec, i) => (
+            <RecCard
+              key={rec.program.id}
+              rec={rec}
+              profile={profile}
+              index={paginated ? (safePage - 1) * PER_PAGE + i + 1 : i + 1}
+              saved={isSaved(rec.program.id)}
+              onToggleSave={() => onToggleSave(rec)}
+            />
+          ))}
+        </ul>
+      )}
 
-      {tab === "all" && totalPages > 1 && (
+      {paginated && totalPages > 1 && (
         <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
       )}
     </section>
