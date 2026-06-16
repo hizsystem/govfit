@@ -16,6 +16,7 @@ import type {
 import { buildProposal, type ProposalFormat } from "@/lib/proposal";
 import { buildNewsletter, type CategoryGroup } from "@/lib/newsletter";
 import { track, getSessionId } from "@/lib/track";
+import { useAuth, displayUserName, type OAuthProvider } from "@/lib/auth";
 
 const EMPTY_PROFILE: CompanyProfile = {
   name: "",
@@ -81,6 +82,12 @@ export default function Home() {
   const [stats, setStats] = useState<{ total: number; sourceCount: number } | null>(
     null,
   );
+  // 인증 (카카오/구글 소셜 로그인 — Supabase). 키 미설정 시 자동 비활성.
+  const auth = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
+  // 로그인 필수 기능인데 미로그인이면 게이트 표시
+  const needsLogin =
+    auth.configured && !auth.user && (view === "saved" || view === "mypage");
 
   useEffect(() => {
     // localStorage는 클라이언트에만 있으므로 마운트 후 읽어 하이드레이션 불일치를 피한다.
@@ -302,9 +309,39 @@ export default function Home() {
             >
               👤 마이페이지
             </button>
+            {auth.configured &&
+              (auth.user ? (
+                <div className="flex shrink-0 items-center gap-1">
+                  <span className="hidden max-w-[8rem] truncate text-xs font-semibold text-gray-600 sm:inline dark:text-gray-300">
+                    {displayUserName(auth.user)}님
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => auth.signOut()}
+                    className="rounded-xl border border-gray-300 px-2.5 py-2 text-xs font-semibold text-gray-600 transition hover:border-blue-400 sm:text-sm dark:border-gray-700 dark:text-gray-300"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowLogin(true)}
+                  className="shrink-0 rounded-xl bg-blue-600 px-2.5 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 sm:text-sm"
+                >
+                  로그인
+                </button>
+              ))}
           </div>
         </div>
       </nav>
+
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          onSignIn={(p) => auth.signIn(p)}
+        />
+      )}
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
         {view !== "mypage" && view !== "intro" && (
@@ -324,7 +361,12 @@ export default function Home() {
         </header>
         )}
 
-      {view === "intro" ? (
+      {needsLogin ? (
+        <LoginGate
+          feature={view === "saved" ? "관심공고" : "마이페이지"}
+          onLogin={() => setShowLogin(true)}
+        />
+      ) : view === "intro" ? (
         <IntroView
           stats={stats}
           onStart={() => setView("search")}
@@ -1292,6 +1334,113 @@ function SitesView() {
         ※ 현재 <b>기업마당 · K-Startup</b> 공고를 실시간 연동 중이며, 다른
         사이트는 순차 연동 예정입니다.
       </p>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 로그인 / 회원가입 (카카오·구글 소셜)
+// ---------------------------------------------------------------------------
+
+/** 로그인 모달 — 카카오/구글 소셜 로그인 (첫 로그인이 곧 회원가입) */
+function LoginModal({
+  onClose,
+  onSignIn,
+}: {
+  onClose: () => void;
+  onSignIn: (provider: OAuthProvider) => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Brand Rise"
+            className="mx-auto mb-3 h-12 w-12 rounded-xl object-cover"
+          />
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            로그인 / 회원가입
+          </h3>
+          <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+            소셜 계정으로 3초 만에 시작하세요.
+            <br />
+            관심공고·마이페이지가 기기를 바꿔도 유지돼요.
+          </p>
+        </div>
+
+        <div className="mt-6 space-y-2.5">
+          <button
+            type="button"
+            onClick={() => onSignIn("kakao")}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-3 text-sm font-bold text-[#191600] transition hover:brightness-95"
+          >
+            <span aria-hidden>💬</span> 카카오로 시작하기
+          </button>
+          <button
+            type="button"
+            onClick={() => onSignIn("google")}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-3 text-sm font-bold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+          >
+            <span aria-hidden>🔵</span> 구글로 시작하기
+          </button>
+        </div>
+
+        <p className="mt-4 text-center text-[11px] leading-relaxed text-gray-400">
+          최초 로그인 시 자동으로 회원가입됩니다. 로그인하면 서비스 이용약관 및
+          개인정보 처리방침에 동의하는 것으로 간주됩니다.
+        </p>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-3 w-full rounded-xl py-2 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          닫기
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** 로그인 필수 기능 진입 시 보여주는 안내 게이트 */
+function LoginGate({
+  feature,
+  onLogin,
+}: {
+  feature: string;
+  onLogin: () => void;
+}) {
+  return (
+    <section className="mx-auto max-w-md rounded-2xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="text-4xl">🔒</div>
+      <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+        로그인이 필요한 기능이에요
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+        <b>{feature}</b>은(는) 로그인 후 이용할 수 있어요.
+        <br />
+        로그인하면 담아둔 공고와 내 정보가 기기를 바꿔도 안전하게 유지됩니다.
+      </p>
+      <ul className="mx-auto mt-4 max-w-xs space-y-1.5 text-left text-sm text-gray-600 dark:text-gray-300">
+        <li>🔖 관심공고를 어디서든 이어보기</li>
+        <li>📅 마감 캘린더로 일정 관리</li>
+        <li>💳 나만의 디지털 명함</li>
+      </ul>
+      <button
+        type="button"
+        onClick={onLogin}
+        className="mt-6 w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+      >
+        로그인 / 회원가입
+      </button>
     </section>
   );
 }
