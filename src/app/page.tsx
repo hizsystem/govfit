@@ -31,6 +31,32 @@ const EMPTY_PROFILE: CompanyProfile = {
 };
 
 const BOOKMARK_KEY = "hiz_bookmarks";
+const MYPROFILE_KEY = "hiz_myprofile";
+
+/** 마이페이지 프로필 (디지털 명함·인사말에 사용. 로그인 없이 이 브라우저에 저장) */
+interface MyProfile {
+  name: string; // 이름
+  company: string; // 회사명/상호
+  title: string; // 직책
+  phone: string;
+  email: string;
+  website: string;
+  tagline: string; // 한 줄 소개
+  industry: string;
+  region: string;
+}
+
+const EMPTY_MYPROFILE: MyProfile = {
+  name: "",
+  company: "",
+  title: "",
+  phone: "",
+  email: "",
+  website: "",
+  tagline: "",
+  industry: "",
+  region: "",
+};
 
 export default function Home() {
   const [profile, setProfile] = useState<CompanyProfile>(EMPTY_PROFILE);
@@ -43,10 +69,14 @@ export default function Home() {
 
   // 찜한 공고 (브라우저 localStorage에 저장 — 로그인 없이 이 브라우저에 보관)
   const [bookmarks, setBookmarks] = useState<Record<string, Recommendation>>({});
-  // 화면 전환: 검색 / 관심공고 / 공고 사이트 모음 / 뉴스레터
+  // 마이페이지 프로필 (디지털 명함 등)
+  const [myProfile, setMyProfile] = useState<MyProfile>(EMPTY_MYPROFILE);
+  // 화면 전환: 검색 / 관심공고 / 공고 사이트 모음 / 뉴스레터 / 마이페이지
   const [view, setView] = useState<
-    "search" | "saved" | "sites" | "newsletter"
+    "search" | "saved" | "sites" | "newsletter" | "mypage"
   >("search");
+  // 관심공고 화면 진입 시 초기 보기 모드 (마이페이지 타일에서 캘린더/목록 지정)
+  const [savedMode, setSavedMode] = useState<"calendar" | "list">("calendar");
 
   useEffect(() => {
     // localStorage는 클라이언트에만 있으므로 마운트 후 읽어 하이드레이션 불일치를 피한다.
@@ -55,10 +85,26 @@ export default function Home() {
       const raw = localStorage.getItem(BOOKMARK_KEY);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setBookmarks(JSON.parse(raw));
+      const rawProfile = localStorage.getItem(MYPROFILE_KEY);
+      if (rawProfile) setMyProfile({ ...EMPTY_MYPROFILE, ...JSON.parse(rawProfile) });
     } catch {
       /* 저장된 값이 깨졌으면 무시 */
     }
   }, []);
+
+  function saveMyProfile(next: MyProfile) {
+    setMyProfile(next);
+    try {
+      localStorage.setItem(MYPROFILE_KEY, JSON.stringify(next));
+    } catch {
+      /* 용량 초과 등은 무시 */
+    }
+  }
+
+  function openSaved(mode: "calendar" | "list") {
+    setSavedMode(mode);
+    setView("saved");
+  }
 
   // 방문 기록 + 체류시간: 마운트 시 page_view, 첫 이탈(탭 숨김/종료) 시 session_end(초)
   useEffect(() => {
@@ -216,7 +262,7 @@ export default function Home() {
             </button>
             <button
               type="button"
-              onClick={() => setView((v) => (v === "saved" ? "search" : "saved"))}
+              onClick={() => openSaved("calendar")}
               className={`shrink-0 rounded-xl px-2.5 py-2 text-xs font-semibold transition sm:text-sm ${
                 view === "saved"
                   ? "bg-blue-600 text-white"
@@ -225,11 +271,23 @@ export default function Home() {
             >
               🔖 관심공고 {savedList.length}
             </button>
+            <button
+              type="button"
+              onClick={() => setView((v) => (v === "mypage" ? "search" : "mypage"))}
+              className={`shrink-0 rounded-xl px-2.5 py-2 text-xs font-semibold transition sm:text-sm ${
+                view === "mypage"
+                  ? "bg-blue-600 text-white"
+                  : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+              }`}
+            >
+              👤 마이페이지
+            </button>
           </div>
         </div>
       </nav>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
+        {view !== "mypage" && (
         <header className="mb-8 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-6 sm:p-8 dark:border-gray-800 dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
             Brand Rise <span className="text-blue-600">정부지원사업 추천</span>
@@ -239,8 +297,18 @@ export default function Home() {
             매겨드려요.
           </p>
         </header>
+        )}
 
-      {view === "newsletter" ? (
+      {view === "mypage" ? (
+        <MyPageView
+          myProfile={myProfile}
+          onSaveProfile={saveMyProfile}
+          savedList={savedList}
+          searchProfile={submittedProfile}
+          onOpenSaved={openSaved}
+          onGoSearch={() => setView("search")}
+        />
+      ) : view === "newsletter" ? (
         <NewsletterView />
       ) : view === "sites" ? (
         <SitesView />
@@ -248,6 +316,7 @@ export default function Home() {
         <SavedView
           savedList={savedList}
           profile={submittedProfile}
+          initialMode={savedMode}
           isSaved={(id) => !!bookmarks[id]}
           onToggleSave={toggleBookmark}
         />
@@ -1165,19 +1234,601 @@ function SitesView() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// 마이페이지 (개인 기능 허브: 관심공고·캘린더·사업계획서·디지털 명함·설정)
+// ---------------------------------------------------------------------------
+
+function MyPageView({
+  myProfile,
+  onSaveProfile,
+  savedList,
+  searchProfile,
+  onOpenSaved,
+  onGoSearch,
+}: {
+  myProfile: MyProfile;
+  onSaveProfile: (p: MyProfile) => void;
+  savedList: Recommendation[];
+  searchProfile: CompanyProfile;
+  onOpenSaved: (mode: "calendar" | "list") => void;
+  onGoSearch: () => void;
+}) {
+  const [section, setSection] = useState<"home" | "card" | "settings">("home");
+
+  // 곧 마감(오늘~7일 이내) 관심공고 수
+  const urgentCount = savedList.filter((r) => {
+    const d = r.program.deadlineEnd ? ddayDiff(r.program.deadlineEnd) : null;
+    return d !== null && d >= 0 && d <= 7;
+  }).length;
+
+  const displayName = myProfile.name || myProfile.company || "회원";
+  const profileFilled = !!(myProfile.name || myProfile.company);
+
+  if (section === "settings") {
+    return (
+      <MyProfileSettings
+        myProfile={myProfile}
+        searchProfile={searchProfile}
+        onSave={(p) => {
+          onSaveProfile(p);
+          setSection("home");
+        }}
+        onBack={() => setSection("home")}
+      />
+    );
+  }
+
+  if (section === "card") {
+    return (
+      <section>
+        <BackBar title="💳 나의 디지털 명함" onBack={() => setSection("home")} />
+        {profileFilled ? (
+          <DigitalCard profile={myProfile} large />
+        ) : (
+          <SetupHint onSetup={() => setSection("settings")} />
+        )}
+        <button
+          type="button"
+          onClick={() => setSection("settings")}
+          className="mt-4 w-full rounded-xl border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-blue-400 dark:border-gray-700 dark:text-gray-200"
+        >
+          ✏️ 명함 정보 편집
+        </button>
+      </section>
+    );
+  }
+
+  // ── 홈(대시보드) ──
+  return (
+    <section className="space-y-6">
+      {/* 인사 히어로 */}
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 p-6 text-white shadow-lg sm:p-7">
+        <p className="text-sm text-blue-100">마이페이지</p>
+        <h2 className="mt-1 text-2xl font-bold">
+          안녕하세요, {displayName}님 👋
+        </h2>
+        <p className="mt-1 text-sm text-blue-100">
+          관심공고와 마감일정을 한곳에서 관리하세요.
+        </p>
+      </div>
+
+      {/* 디지털 명함 미리보기 / 설정 유도 */}
+      {profileFilled ? (
+        <DigitalCard profile={myProfile} onEdit={() => setSection("settings")} />
+      ) : (
+        <SetupHint onSetup={() => setSection("settings")} />
+      )}
+
+      {/* 요약 통계 */}
+      <div className="grid grid-cols-2 gap-3">
+        <StatTile
+          label="관심 공고"
+          value={`${savedList.length}건`}
+          tone="blue"
+          onClick={() => onOpenSaved("list")}
+        />
+        <StatTile
+          label="곧 마감 (7일 이내)"
+          value={`${urgentCount}건`}
+          tone="red"
+          onClick={() => onOpenSaved("calendar")}
+        />
+      </div>
+
+      {/* 기능 타일 */}
+      <div>
+        <h3 className="mb-3 text-sm font-bold text-gray-500 dark:text-gray-400">
+          기능 바로가기
+        </h3>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <FeatureTile
+            icon="🔖"
+            title="내 관심 공고"
+            desc="담아둔 지원사업"
+            onClick={() => onOpenSaved("list")}
+          />
+          <FeatureTile
+            icon="📅"
+            title="마감 캘린더"
+            desc="달력으로 한눈에"
+            onClick={() => onOpenSaved("calendar")}
+          />
+          <FeatureTile
+            icon="📝"
+            title="사업계획서 작성"
+            desc="관심공고로 초안"
+            onClick={() => onOpenSaved("list")}
+          />
+          <FeatureTile
+            icon="💳"
+            title="디지털 명함"
+            desc="공유·연락처 저장"
+            onClick={() => setSection("card")}
+          />
+          <FeatureTile
+            icon="⚙️"
+            title="프로필 설정"
+            desc="명함·인사말 정보"
+            onClick={() => setSection("settings")}
+          />
+          <FeatureTile
+            icon="🔍"
+            title="지원사업 검색"
+            desc="맞춤 추천 받기"
+            onClick={onGoSearch}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** 마이페이지 내부 화면 상단의 뒤로가기 바 */
+function BackBar({ title, onBack }: { title: string; onBack: () => void }) {
+  return (
+    <div className="mb-4 flex items-center gap-2">
+      <button
+        type="button"
+        onClick={onBack}
+        className="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+        aria-label="마이페이지로"
+      >
+        ‹ 뒤로
+      </button>
+      <h2 className="text-lg font-bold">{title}</h2>
+    </div>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  tone,
+  onClick,
+}: {
+  label: string;
+  value: string;
+  tone: "blue" | "red";
+  onClick: () => void;
+}) {
+  const toneCls =
+    tone === "red"
+      ? "text-red-600 dark:text-red-400"
+      : "text-blue-600 dark:text-blue-400";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-2xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:border-blue-400 dark:border-gray-800 dark:bg-gray-900"
+    >
+      <div className={`text-2xl font-extrabold ${toneCls}`}>{value}</div>
+      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{label}</div>
+    </button>
+  );
+}
+
+function FeatureTile({
+  icon,
+  title,
+  desc,
+  onClick,
+}: {
+  icon: string;
+  title: string;
+  desc: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-col items-start gap-1 rounded-2xl border border-gray-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+    >
+      <span className="text-2xl">{icon}</span>
+      <span className="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100">
+        {title}
+      </span>
+      <span className="text-xs text-gray-500 dark:text-gray-400">{desc}</span>
+    </button>
+  );
+}
+
+/** 프로필 미설정 시 명함 자리에 띄우는 설정 유도 카드 */
+function SetupHint({ onSetup }: { onSetup: () => void }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-800/50">
+      <div className="text-3xl">💳</div>
+      <p className="mt-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
+        나만의 디지털 명함을 만들어보세요
+      </p>
+      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        이름·연락처를 입력하면 공유·연락처 저장이 가능한 명함이 만들어져요.
+      </p>
+      <button
+        type="button"
+        onClick={onSetup}
+        className="mt-3 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+      >
+        프로필 설정하기
+      </button>
+    </div>
+  );
+}
+
+/** vCard(.vcf) 텍스트 생성 — 휴대폰 연락처에 바로 저장 가능한 표준 포맷 */
+function buildVCard(p: MyProfile): string {
+  const esc = (s: string) =>
+    s.replace(/[\\;,]/g, (m) => `\\${m}`).replace(/\n/g, "\\n");
+  const lines = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    `FN:${esc(p.name || p.company || "명함")}`,
+    p.name && `N:${esc(p.name)};;;;`,
+    p.company && `ORG:${esc(p.company)}`,
+    p.title && `TITLE:${esc(p.title)}`,
+    p.phone && `TEL;TYPE=CELL:${esc(p.phone)}`,
+    p.email && `EMAIL;TYPE=INTERNET:${esc(p.email)}`,
+    p.website && `URL:${esc(p.website)}`,
+    p.tagline && `NOTE:${esc(p.tagline)}`,
+    "END:VCARD",
+  ].filter(Boolean) as string[];
+  return lines.join("\r\n");
+}
+
+/** 디지털 명함 카드 + 동작(연락처 저장·복사·공유) */
+function DigitalCard({
+  profile,
+  large,
+  onEdit,
+}: {
+  profile: MyProfile;
+  large?: boolean;
+  onEdit?: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  function plainText(): string {
+    return [
+      profile.name && profile.title
+        ? `${profile.name} (${profile.title})`
+        : profile.name,
+      profile.company,
+      profile.tagline,
+      profile.phone && `📞 ${profile.phone}`,
+      profile.email && `✉️ ${profile.email}`,
+      profile.website && `🌐 ${profile.website}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(plainText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* 클립보드 권한 없으면 무시 */
+    }
+  }
+
+  function downloadVCard() {
+    const blob = new Blob([buildVCard(profile)], {
+      type: "text/vcard;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${profile.name || profile.company || "명함"}.vcf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function share() {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: profile.name || profile.company || "명함",
+          text: plainText(),
+        });
+      } catch {
+        /* 사용자가 공유 취소 */
+      }
+    } else {
+      copy();
+    }
+  }
+
+  const initials = (profile.name || profile.company || "?").slice(0, 2);
+
+  return (
+    <div>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-black p-6 text-white shadow-lg">
+        {/* 장식용 광원 */}
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-blue-500/20 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-violet-500/20 blur-2xl" />
+
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-violet-500 text-lg font-bold">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className={`font-bold ${large ? "text-2xl" : "text-xl"}`}>
+              {profile.name || "이름 미설정"}
+            </h3>
+            <p className="text-sm text-blue-200">
+              {[profile.title, profile.company].filter(Boolean).join(" · ") ||
+                "직책·회사 미설정"}
+            </p>
+          </div>
+        </div>
+
+        {profile.tagline && (
+          <p className="relative mt-4 text-sm leading-relaxed text-gray-300">
+            “{profile.tagline}”
+          </p>
+        )}
+
+        <dl className="relative mt-4 space-y-1.5 text-sm">
+          {profile.phone && (
+            <div className="flex items-center gap-2 text-gray-200">
+              <span>📞</span>
+              <a href={`tel:${profile.phone}`} className="hover:underline">
+                {profile.phone}
+              </a>
+            </div>
+          )}
+          {profile.email && (
+            <div className="flex items-center gap-2 text-gray-200">
+              <span>✉️</span>
+              <a href={`mailto:${profile.email}`} className="break-all hover:underline">
+                {profile.email}
+              </a>
+            </div>
+          )}
+          {profile.website && (
+            <div className="flex items-center gap-2 text-gray-200">
+              <span>🌐</span>
+              <span className="break-all">{profile.website}</span>
+            </div>
+          )}
+          {(profile.industry || profile.region) && (
+            <div className="flex items-center gap-2 text-gray-400">
+              <span>🏷</span>
+              <span>
+                {[profile.industry, profile.region].filter(Boolean).join(" · ")}
+              </span>
+            </div>
+          )}
+        </dl>
+      </div>
+
+      {/* 동작 버튼 */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={downloadVCard}
+          className="rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+        >
+          📇 연락처 저장
+        </button>
+        <button
+          type="button"
+          onClick={copy}
+          className="rounded-xl border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-blue-400 dark:border-gray-700 dark:text-gray-200"
+        >
+          {copied ? "복사됨!" : "📋 정보 복사"}
+        </button>
+        <button
+          type="button"
+          onClick={share}
+          className="rounded-xl border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 transition hover:border-blue-400 dark:border-gray-700 dark:text-gray-200"
+        >
+          🔗 공유
+        </button>
+        {onEdit && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="ml-auto rounded-xl px-3 py-2 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            ✏️ 편집
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** 마이페이지 프로필 설정 폼 */
+function MyProfileSettings({
+  myProfile,
+  searchProfile,
+  onSave,
+  onBack,
+}: {
+  myProfile: MyProfile;
+  searchProfile: CompanyProfile;
+  onSave: (p: MyProfile) => void;
+  onBack: () => void;
+}) {
+  const [form, setForm] = useState<MyProfile>(myProfile);
+  function set<K extends keyof MyProfile>(k: K, v: MyProfile[K]) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  const canImport = !!(
+    searchProfile.name ||
+    searchProfile.industry ||
+    searchProfile.region ||
+    searchProfile.description
+  );
+
+  function importFromSearch() {
+    setForm((f) => ({
+      ...f,
+      company: f.company || searchProfile.name,
+      industry: f.industry || searchProfile.industry,
+      region: f.region || searchProfile.region,
+      tagline: f.tagline || searchProfile.description.slice(0, 60),
+    }));
+  }
+
+  return (
+    <section>
+      <BackBar title="⚙️ 프로필 설정" onBack={onBack} />
+      <p className="mb-4 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-relaxed text-gray-600 dark:bg-blue-950/30 dark:text-gray-400">
+        💡 입력한 정보는 디지털 명함과 마이페이지 인사말에 사용돼요. 이 브라우저에만
+        저장되며 서버로 전송되지 않습니다.
+      </p>
+
+      {canImport && (
+        <button
+          type="button"
+          onClick={importFromSearch}
+          className="mb-4 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 dark:border-gray-700 dark:text-gray-300"
+        >
+          ↪ 최근 검색 정보 가져오기
+        </button>
+      )}
+
+      <div className="space-y-4">
+        <Field label="이름">
+          <input
+            className={inputCls}
+            value={form.name}
+            onChange={(e) => set("name", e.target.value)}
+            placeholder="홍길동"
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="회사명 / 상호">
+            <input
+              className={inputCls}
+              value={form.company}
+              onChange={(e) => set("company", e.target.value)}
+              placeholder="브랜드라이즈"
+            />
+          </Field>
+          <Field label="직책">
+            <input
+              className={inputCls}
+              value={form.title}
+              onChange={(e) => set("title", e.target.value)}
+              placeholder="대표"
+            />
+          </Field>
+        </div>
+        <Field label="휴대폰">
+          <input
+            className={inputCls}
+            value={form.phone}
+            onChange={(e) => set("phone", e.target.value)}
+            placeholder="010-1234-5678"
+            inputMode="tel"
+          />
+        </Field>
+        <Field label="이메일">
+          <input
+            className={inputCls}
+            value={form.email}
+            onChange={(e) => set("email", e.target.value)}
+            placeholder="me@example.com"
+            inputMode="email"
+          />
+        </Field>
+        <Field label="웹사이트 / SNS">
+          <input
+            className={inputCls}
+            value={form.website}
+            onChange={(e) => set("website", e.target.value)}
+            placeholder="https://..."
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="업종">
+            <input
+              className={inputCls}
+              value={form.industry}
+              onChange={(e) => set("industry", e.target.value)}
+              placeholder="IT/소프트웨어"
+            />
+          </Field>
+          <Field label="지역">
+            <input
+              className={inputCls}
+              value={form.region}
+              onChange={(e) => set("region", e.target.value)}
+              placeholder="서울"
+            />
+          </Field>
+        </div>
+        <Field label="한 줄 소개">
+          <input
+            className={inputCls}
+            value={form.tagline}
+            onChange={(e) => set("tagline", e.target.value)}
+            placeholder="고객의 브랜드 성장을 돕습니다"
+            maxLength={60}
+          />
+        </Field>
+      </div>
+
+      <div className="mt-6 flex gap-2">
+        <button
+          type="button"
+          onClick={() => onSave(form)}
+          className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+        >
+          저장
+        </button>
+        <button
+          type="button"
+          onClick={onBack}
+          className="rounded-xl border border-gray-300 px-5 py-3 text-sm font-semibold text-gray-600 transition hover:border-gray-400 dark:border-gray-700 dark:text-gray-300"
+        >
+          취소
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function SavedView({
   savedList,
   profile,
   isSaved,
   onToggleSave,
+  initialMode = "calendar",
 }: {
   savedList: Recommendation[];
   profile: CompanyProfile;
   isSaved: (id: string) => boolean;
   onToggleSave: (rec: Recommendation) => void;
+  initialMode?: "calendar" | "list";
 }) {
   // 목록 / 캘린더 보기 전환. 마감일을 한눈에 보려는 게 주 목적이라 캘린더를 기본으로.
-  const [mode, setMode] = useState<"calendar" | "list">("calendar");
+  const [mode, setMode] = useState<"calendar" | "list">(initialMode);
 
   return (
     <section>
