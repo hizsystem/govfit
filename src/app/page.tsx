@@ -262,13 +262,13 @@ export default function Home() {
               Brand Rise
             </span>
           </button>
-          <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <div className="flex flex-wrap items-center justify-end gap-1 md:gap-1.5">
             <button
               type="button"
               onClick={() =>
                 setView((v) => (v === "newsletter" ? "search" : "newsletter"))
               }
-              className={`shrink-0 rounded-xl px-2.5 py-2 text-xs font-semibold transition sm:text-sm ${
+              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "newsletter"
                   ? "bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
@@ -279,7 +279,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setView((v) => (v === "sites" ? "search" : "sites"))}
-              className={`shrink-0 rounded-xl px-2.5 py-2 text-xs font-semibold transition sm:text-sm ${
+              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "sites"
                   ? "bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
@@ -290,7 +290,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => openSaved("calendar")}
-              className={`shrink-0 rounded-xl px-2.5 py-2 text-xs font-semibold transition sm:text-sm ${
+              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "saved"
                   ? "bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
@@ -301,7 +301,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setView((v) => (v === "mypage" ? "search" : "mypage"))}
-              className={`shrink-0 rounded-xl px-2.5 py-2 text-xs font-semibold transition sm:text-sm ${
+              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "mypage"
                   ? "bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
@@ -318,7 +318,7 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => auth.signOut()}
-                    className="rounded-xl border border-gray-300 px-2.5 py-2 text-xs font-semibold text-gray-600 transition hover:border-blue-400 sm:text-sm dark:border-gray-700 dark:text-gray-300"
+                    className="rounded-xl border border-gray-300 px-1.5 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 sm:px-2.5 sm:py-2 sm:text-sm dark:border-gray-700 dark:text-gray-300"
                   >
                     로그아웃
                   </button>
@@ -327,7 +327,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setShowLogin(true)}
-                  className="shrink-0 rounded-xl bg-blue-600 px-2.5 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 sm:text-sm"
+                  className="shrink-0 rounded-xl bg-blue-600 px-1.5 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700 sm:px-2.5 sm:py-2 sm:text-sm"
                 >
                   로그인
                 </button>
@@ -502,17 +502,41 @@ export default function Home() {
                 />
               </Field>
 
-              <Field label="연매출 (억원)">
-                <input
-                  type="number"
-                  min={0}
-                  value={profile.annualRevenueEok || ""}
-                  onChange={(e) =>
-                    update("annualRevenueEok", Number(e.target.value) || 0)
-                  }
-                  placeholder="예: 5"
-                  className={inputCls}
-                />
+              <Field label="연매출">
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="revenue-range"
+                      checked={profile.annualRevenueEok === 0}
+                      onChange={() => update("annualRevenueEok", 0)}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">1억 미만</span>
+                  </label>
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="revenue-range"
+                      checked={profile.annualRevenueEok > 0}
+                      onChange={() => update("annualRevenueEok", 1)}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">1억 이상</span>
+                  </label>
+                  {profile.annualRevenueEok > 0 && (
+                    <input
+                      type="number"
+                      min={1}
+                      value={profile.annualRevenueEok}
+                      onChange={(e) =>
+                        update("annualRevenueEok", Number(e.target.value) || 1)
+                      }
+                      placeholder="예: 5"
+                      className={`ml-7 ${inputCls}`}
+                    />
+                  )}
+                </div>
               </Field>
             </>
           )}
