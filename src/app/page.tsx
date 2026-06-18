@@ -36,6 +36,9 @@ const MYPROFILE_KEY = "hiz_myprofile";
 
 /** 문의·개인정보(열람·정정·삭제) 요청 수신 메일. */
 const CONTACT_EMAIL = "yeji_lee@hizpeople.com";
+/** 고객지원·서비스장애·제휴·제안·기타 문의 대표 전화 */
+const CONTACT_PHONE_DISPLAY = "(+82) 02-6925-0034";
+const CONTACT_PHONE_TEL = "+82-2-6925-0034";
 
 /** 마이페이지 프로필 (디지털 명함·인사말에 사용. 로그인 없이 이 브라우저에 저장) */
 interface MyProfile {
@@ -715,6 +718,15 @@ function ContactSection() {
       >
         ✉️ {CONTACT_EMAIL}
       </a>
+      <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+        고객지원·서비스장애·제휴·제안·기타 문의 :{" "}
+        <a
+          href={`tel:${CONTACT_PHONE_TEL}`}
+          className="font-semibold text-blue-600 hover:underline"
+        >
+          {CONTACT_PHONE_DISPLAY}
+        </a>
+      </p>
       <p className="mt-3 text-xs text-gray-400">
         ※ 영업일 기준으로 순차적으로 답변드립니다.
       </p>
