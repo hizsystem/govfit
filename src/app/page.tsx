@@ -84,7 +84,11 @@ export default function Home() {
   // 관심공고 화면 진입 시 초기 보기 모드 (마이페이지 타일에서 캘린더/목록 지정)
   const [savedMode, setSavedMode] = useState<"calendar" | "list">("calendar");
   // 연동된 지원사업 총 개수/소스 수 (소개·헤더에 표시)
-  const [stats, setStats] = useState<{ total: number; sourceCount: number } | null>(
+  const [stats, setStats] = useState<{
+    total: number;
+    cumulative: number;
+    sourceCount: number;
+  } | null>(
     null,
   );
   // 인증 (카카오/구글 소셜 로그인 — Supabase). 키 미설정 시 자동 비활성.
@@ -115,7 +119,11 @@ export default function Home() {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (alive && d && typeof d.total === "number") {
-          setStats({ total: d.total, sourceCount: d.sourceCount ?? 0 });
+          setStats({
+            total: d.total,
+            cumulative: d.cumulative ?? 0,
+            sourceCount: d.sourceCount ?? 0,
+          });
         }
       })
       .catch(() => {});
@@ -362,10 +370,20 @@ export default function Home() {
             회사 정보를 입력하면 조건에 맞는 지원사업을 골라 AI가 적합도를
             매겨드려요.
           </p>
-          {stats && stats.total > 0 && (
-            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-600/10 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-400/10 dark:text-blue-300">
-              📡 현재 <b>{stats.total.toLocaleString()}개</b>의 지원사업 실시간 연동 중
-            </p>
+          {stats && (stats.cumulative > 0 || stats.total > 0) && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {stats.cumulative > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-400/10 dark:text-indigo-300">
+                  📚 누적 연동 공고{" "}
+                  <b>{stats.cumulative.toLocaleString()}건</b>
+                </span>
+              )}
+              {stats.total > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600/10 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-400/10 dark:text-blue-300">
+                  📡 지금 신청 가능 <b>{stats.total.toLocaleString()}건</b>
+                </span>
+              )}
+            </div>
           )}
         </header>
         )}
@@ -1606,7 +1624,7 @@ function IntroView({
   onOpenMypage,
   onOpenNewsletter,
 }: {
-  stats: { total: number; sourceCount: number } | null;
+  stats: { total: number; cumulative: number; sourceCount: number } | null;
   onStart: () => void;
   onOpenMypage: () => void;
   onOpenNewsletter: () => void;
@@ -1653,10 +1671,14 @@ function IntroView({
               👤 마이페이지
             </button>
           </div>
-          {stats && stats.total > 0 && (
+          {stats && (stats.cumulative > 0 || stats.total > 0) && (
             <p className="mt-6 text-sm text-blue-100">
-              📡 지금까지 <b className="text-white">{stats.total.toLocaleString()}개</b>의
-              지원사업을 연동했어요
+              📚 누적{" "}
+              <b className="text-white">
+                {(stats.cumulative || stats.total).toLocaleString()}건
+              </b>{" "}
+              · 📡 지금 신청 가능{" "}
+              <b className="text-white">{stats.total.toLocaleString()}건</b>
             </p>
           )}
         </div>
@@ -1666,9 +1688,15 @@ function IntroView({
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[
           {
-            big: stats && stats.total > 0 ? `${stats.total.toLocaleString()}건` : "실시간",
-            label: "연동된 지원사업",
-            sub: "중복 제거 후 최신 유지",
+            big:
+              stats && stats.cumulative > 0
+                ? `${stats.cumulative.toLocaleString()}건`
+                : "실시간",
+            label: "누적 연동 공고",
+            sub:
+              stats && stats.total > 0
+                ? `지금 신청 가능 ${stats.total.toLocaleString()}건`
+                : "마감 포함 누적",
           },
           {
             big: stats && stats.sourceCount > 0 ? `${stats.sourceCount}곳` : "5+",
