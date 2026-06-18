@@ -34,8 +34,8 @@ const EMPTY_PROFILE: CompanyProfile = {
 const BOOKMARK_KEY = "hiz_bookmarks";
 const MYPROFILE_KEY = "hiz_myprofile";
 
-/** 문의·개인정보(열람·정정·삭제) 요청 수신 메일. ※ 실제 수신 주소로 교체하세요. */
-const CONTACT_EMAIL = "support@brandrise.kr";
+/** 문의·개인정보(열람·정정·삭제) 요청 수신 메일. */
+const CONTACT_EMAIL = "yeji_lee@hizpeople.com";
 
 /** 마이페이지 프로필 (디지털 명함·인사말에 사용. 로그인 없이 이 브라우저에 저장) */
 interface MyProfile {
