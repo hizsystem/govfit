@@ -5,7 +5,7 @@ import { filterPrograms } from "@/lib/filter";
 import { scoreCandidates } from "@/lib/match";
 import { logSearch } from "@/lib/analytics";
 
-// 여러 공공 API(기업마당·K-Startup·aT·판판대로)를 병렬 호출하므로
+// 여러 공공 OpenAPI(기업마당·K-Startup·보조금24·과기정통부)를 병렬 호출하므로
 // Vercel 기본 함수 타임아웃보다 여유를 둔다. (각 fetch는 12초에 끊겨 폴백)
 export const maxDuration = 30;
 

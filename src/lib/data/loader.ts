@@ -6,9 +6,6 @@ import {
   fetchBizinfoAgriPrograms,
 } from "@/lib/data/bizinfo";
 import { fetchKstartupPrograms } from "@/lib/data/kstartup";
-import { fetchAtPrograms } from "@/lib/data/at";
-import { fetchFanfandaeroPrograms } from "@/lib/data/fanfandaero";
-import { fetchSbaPrograms } from "@/lib/data/sba";
 import { fetchGov24Programs } from "@/lib/data/gov24";
 import { fetchMsitPrograms } from "@/lib/data/msit";
 
@@ -33,15 +30,16 @@ export const loadPrograms: () => Promise<LoadedPrograms> = unstable_cache(
   { revalidate: 60 * 60 },
 );
 
-/** 실제 다중 소스 집계 (느림 — 외부 공공 API 6종 호출). loadPrograms가 캐시한다. */
+/**
+ * 실제 다중 소스 집계 (느림 — 외부 공공 OpenAPI 호출). loadPrograms가 캐시한다.
+ * 정부가 인증키로 공식 개방한 OpenAPI만 사용한다(공공저작물 자유이용·공공데이터법 범위).
+ * HTML 스크래핑·비공식 내부 엔드포인트 소스(aT·SBA·판판대로)는 법적 회색지대라 제거했다.
+ */
 async function loadProgramsUncached(): Promise<LoadedPrograms> {
   const settled = await Promise.allSettled([
     fetchBizinfoPrograms(),
     fetchBizinfoAgriPrograms(), // 농업 분야 공고 추가 수집 (제목 기준 중복 제거됨)
     fetchKstartupPrograms(),
-    fetchAtPrograms(), // 글로벌aT 농식품 수출지원 공고 (HTML 파싱)
-    fetchFanfandaeroPrograms(), // 판판대로(중소기업유통센터) 판로·유통 공고 (JSON)
-    fetchSbaPrograms(), // 서울경제진흥원(SBA) 사업공고 (HTML 파싱, 서울 소재 기업 대상)
     fetchGov24Programs(), // 보조금24(행안부) 정부·지자체 공공서비스 중 기업 대상
     fetchMsitPrograms(), // 과학기술정보통신부 사업공고 (R&D·공모, 조달성 제외)
   ]);
