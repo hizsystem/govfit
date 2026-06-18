@@ -48,48 +48,56 @@ const BIZ_TARGET = /소상공인|법인|기업|창업|중소|상인|사업자/;
 /**
  * 보조금24 기업 대상 공공서비스를 불러온다.
  * 전체(~1.1만 건)를 페이지로 받아 기업/소상공인 대상만 남긴다(개인·가구 전용 제외).
- * @throws 키 미설정 시. (페이지 일부 실패는 무시하고 받은 만큼 반환)
+ *
+ * 페이지를 "병렬"로 받는다 — perPage=1000 한 페이지가 ~6.5초라 12페이지를 순차로
+ * 받으면 ~78초가 걸려 Vercel 함수 타임아웃(maxDuration)을 넘겨 통째로 0건이 됐다.
+ * 병렬로 받으면 벽시계 시간이 가장 느린 한 페이지(~7초)로 줄어 타임아웃 안에 끝난다.
+ * 일부 페이지 실패는 무시하고 받은 만큼 반환한다(전 페이지 실패 시에만 예외).
+ * @throws 키 미설정·전 페이지 실패 시
  */
 export async function fetchGov24Programs(): Promise<SupportProgram[]> {
   const key = process.env.GOV24_API_KEY;
   if (!key) throw new Error("GOV24_API_KEY 미설정");
 
+  const settled = await Promise.allSettled(
+    Array.from({ length: MAX_PAGES }, (_, i) => fetchGov24Page(key, i + 1)),
+  );
+
   const out: SupportProgram[] = [];
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const url =
-      `${ENDPOINT}?serviceKey=${key}` +
-      `&page=${page}&perPage=${PER_PAGE}&returnType=JSON`;
-
-    let items: Gov24Item[];
-    try {
-      const res = await fetch(url, {
-        next: { revalidate: 60 * 60 },
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(12_000),
-      });
-      if (!res.ok) {
-        // 첫 페이지부터 실패면 키/권한 문제 → 예외로 폴백 유도
-        if (page === 1) throw new Error(`보조금24 API HTTP ${res.status}`);
-        break;
-      }
-      const raw = (await res.json()) as { data?: Gov24Item[] };
-      items = Array.isArray(raw?.data) ? raw.data : [];
-    } catch (err) {
-      if (page === 1) throw err;
-      break; // 중간 페이지 실패는 받은 만큼만 사용
+  let anyOk = false;
+  for (const r of settled) {
+    if (r.status === "fulfilled") {
+      anyOk = true;
+      out.push(...r.value);
+    } else {
+      console.warn("[gov24] 페이지 수집 실패:", r.reason);
     }
-
-    if (items.length === 0) break; // 더 없음
-    for (const it of items) {
-      if (!BIZ_TARGET.test(clean(it.사용자구분))) continue; // 기업 대상만
-      const p = toSupportProgram(it);
-      if (p) out.push(p);
-    }
-    if (items.length < PER_PAGE) break; // 마지막 페이지
   }
+  if (!anyOk) throw new Error("보조금24 응답에 기업 대상 공고가 없습니다.");
+  return out;
+}
 
-  if (out.length === 0) {
-    throw new Error("보조금24 응답에 기업 대상 공고가 없습니다.");
+/** 한 페이지를 받아 기업/소상공인 대상 서비스만 SupportProgram으로 변환 */
+async function fetchGov24Page(key: string, page: number): Promise<SupportProgram[]> {
+  const url =
+    `${ENDPOINT}?serviceKey=${key}` +
+    `&page=${page}&perPage=${PER_PAGE}&returnType=JSON`;
+
+  const res = await fetch(url, {
+    next: { revalidate: 60 * 60 },
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(15_000), // 한 페이지(1MB+)가 느려도 여유 있게
+  });
+  if (!res.ok) throw new Error(`보조금24 API HTTP ${res.status}`);
+
+  const raw = (await res.json()) as { data?: Gov24Item[] };
+  const items = Array.isArray(raw?.data) ? raw.data : [];
+
+  const out: SupportProgram[] = [];
+  for (const it of items) {
+    if (!BIZ_TARGET.test(clean(it.사용자구분))) continue; // 기업 대상만
+    const p = toSupportProgram(it);
+    if (p) out.push(p);
   }
   return out;
 }

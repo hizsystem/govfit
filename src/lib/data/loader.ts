@@ -1,4 +1,3 @@
-import { unstable_cache } from "next/cache";
 import type { DataSource, SupportProgram } from "@/lib/types";
 import { PROGRAMS as SAMPLE_PROGRAMS } from "@/lib/data/programs";
 import {
@@ -15,21 +14,36 @@ export interface LoadedPrograms {
   source: DataSource;
 }
 
+const CACHE_TTL_MS = 60 * 60 * 1000; // 집계 결과 1시간 캐시
+let cache: { expires: number; value: LoadedPrograms } | null = null;
+let inflight: Promise<LoadedPrograms> | null = null;
+
 /**
- * 추천에 사용할 지원사업 목록을 불러온다.
+ * 추천에 사용할 지원사업 목록을 불러온다 (1시간 인메모리 캐시).
  *
- * 집계 결과를 1시간 캐시한다. (핵심 성능 포인트)
- * 개별 fetch에도 revalidate가 걸려 있지만, Next의 fetch Data Cache는 GET만
- * 캐시한다. 판판대로는 list·상세를 POST로 호출해 매 요청 재실행(수십 번)됐고
- * 그게 응답 지연의 주범이었다. 그래서 GET/POST 구분 없이 집계 "결과 전체"를
- * 캐시해, 매 요청은 캐시를 읽어 필터·점수만 계산하도록 한다.
- * 만료되면 stale을 즉시 주고 백그라운드로 갱신 → 사용자는 거의 항상 빠르게 받는다.
+ * 처음엔 Next의 `unstable_cache`로 집계 결과를 캐시했으나, 결과가 수 MB라
+ * "2MB 초과는 캐시 불가" 한계에 걸려 저장이 매번 실패 → 매 요청 전 소스를
+ * 재집계하며 외부 API 쿼터를 소진하고, 무거운 보조금24가 타임아웃에 걸려
+ * 일부 소스가 통째로 누락됐다. 그래서 프로세스 메모리에 직접 캐시한다(2MB 제한 없음).
+ * 동시 요청은 `inflight`로 합쳐 콜드 스타트 때 같은 집계가 중복 실행되는 것을 막는다.
  */
-export const loadPrograms: () => Promise<LoadedPrograms> = unstable_cache(
-  loadProgramsUncached,
-  ["govfit-programs-v4"],
-  { revalidate: 60 * 60 },
-);
+export async function loadPrograms(): Promise<LoadedPrograms> {
+  if (cache && cache.expires > Date.now()) return cache.value;
+  if (inflight) return inflight; // 진행 중인 집계가 있으면 그 결과를 공유
+
+  inflight = loadProgramsUncached()
+    .then((value) => {
+      // 실데이터일 때만 캐시한다. 샘플 폴백은 캐시하지 않아 곧바로 재시도된다.
+      if (value.source !== "sample") {
+        cache = { expires: Date.now() + CACHE_TTL_MS, value };
+      }
+      return value;
+    })
+    .finally(() => {
+      inflight = null;
+    });
+  return inflight;
+}
 
 /**
  * 실제 다중 소스 집계 (느림 — 외부 공공 OpenAPI 호출). loadPrograms가 캐시한다.
