@@ -621,15 +621,15 @@ export default function Home() {
             <br />
             맞춤 추천을 위해{" "}
             <b>업종·지역·업력·근로자수·매출·회사 특성·관심분야·회사 소개</b>를
-            수집·이용합니다. (목적: 지원사업 매칭 및 서비스 개선 · 보유: 목적 달성
-            시까지) 동의하셔야 검색할 수 있으며, 수집된 정보의 열람·삭제는{" "}
+            수집·이용합니다. (목적: 지원사업 매칭 및 서비스 개선 · 보유기간:
+            수집일로부터 1년) 동의하셔야 검색할 수 있으며, 관련 문의는{" "}
             <a
               href="#contact"
               className="font-semibold text-blue-600 hover:underline"
             >
               하단 문의하기
             </a>
-            로 요청할 수 있어요.
+            로 연락 주세요.
           </span>
         </label>
 
@@ -688,8 +688,8 @@ function ContactSection() {
         📩 문의하기
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-        <b>개인정보 관련 문의</b>(수집·이용 내역 열람, 정정, 삭제 요청)나{" "}
-        <b>그 밖의 궁금한 점</b>은 아래 메일로 보내주세요.
+        <b>개인정보 관련 문의</b>나 <b>그 밖의 궁금한 점</b>은 아래 메일로 연락
+        주세요.
       </p>
       <a
         href={mailto}
@@ -698,8 +698,7 @@ function ContactSection() {
         ✉️ {CONTACT_EMAIL}
       </a>
       <p className="mt-3 text-xs text-gray-400">
-        ※ 개인정보의 열람·정정·삭제 요청은 이 메일로 접수되며, 본인 확인 후 지체
-        없이 처리합니다.
+        ※ 영업일 기준으로 순차적으로 답변드립니다.
       </p>
     </section>
   );
