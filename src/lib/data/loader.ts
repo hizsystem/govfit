@@ -8,6 +8,7 @@ import {
 import { fetchKstartupPrograms } from "@/lib/data/kstartup";
 import { fetchGov24Programs } from "@/lib/data/gov24";
 import { fetchMsitPrograms } from "@/lib/data/msit";
+import { fetchYouthPrograms } from "@/lib/data/youth";
 
 export interface LoadedPrograms {
   programs: SupportProgram[];
@@ -42,6 +43,7 @@ async function loadProgramsUncached(): Promise<LoadedPrograms> {
     fetchKstartupPrograms(),
     fetchGov24Programs(), // 보조금24(행안부) 정부·지자체 공공서비스 중 기업 대상
     fetchMsitPrograms(), // 과학기술정보통신부 사업공고 (R&D·공모, 조달성 제외)
+    fetchYouthPrograms(), // 온통청년 청년정책 중 일자리·창업·교육 분야만
   ]);
 
   const all: SupportProgram[] = [];
