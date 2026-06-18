@@ -34,6 +34,9 @@ const EMPTY_PROFILE: CompanyProfile = {
 const BOOKMARK_KEY = "hiz_bookmarks";
 const MYPROFILE_KEY = "hiz_myprofile";
 
+/** 문의·개인정보(열람·정정·삭제) 요청 수신 메일. ※ 실제 수신 주소로 교체하세요. */
+const CONTACT_EMAIL = "support@brandrise.kr";
+
 /** 마이페이지 프로필 (디지털 명함·인사말에 사용. 로그인 없이 이 브라우저에 저장) */
 interface MyProfile {
   name: string; // 이름
@@ -67,6 +70,8 @@ export default function Home() {
   const [submittedProfile, setSubmittedProfile] =
     useState<CompanyProfile>(EMPTY_PROFILE);
   const [error, setError] = useState<string | null>(null);
+  // 개인정보 수집·이용 동의 (체크해야 검색 가능 — 동의자만 검색 정책)
+  const [consent, setConsent] = useState(false);
 
   // 찜한 공고 (브라우저 localStorage에 저장 — 로그인 없이 이 브라우저에 보관)
   const [bookmarks, setBookmarks] = useState<Record<string, Recommendation>>({});
@@ -220,6 +225,10 @@ export default function Home() {
       setError("업종과 지역은 필수 선택입니다.");
       return;
     }
+    if (!consent) {
+      setError("개인정보 수집·이용에 동의하셔야 검색할 수 있어요.");
+      return;
+    }
     setError(null);
     setLoading(true);
     setResult(null);
@@ -227,7 +236,7 @@ export default function Home() {
       const res = await fetch("/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...profile, sessionId: getSessionId() }),
+        body: JSON.stringify({ ...profile, consent, sessionId: getSessionId() }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -597,9 +606,36 @@ export default function Home() {
           </p>
         )}
 
+        {/* 개인정보 수집·이용 동의 — 체크해야 추천받기 버튼이 활성화된다 */}
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/40">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0"
+          />
+          <span className="text-xs leading-relaxed text-gray-600 dark:text-gray-300">
+            <b className="text-gray-800 dark:text-gray-100">
+              [필수] 개인정보 수집·이용 동의
+            </b>
+            <br />
+            맞춤 추천을 위해{" "}
+            <b>업종·지역·업력·근로자수·매출·회사 특성·관심분야·회사 소개</b>를
+            수집·이용합니다. (목적: 지원사업 매칭 및 서비스 개선 · 보유: 목적 달성
+            시까지) 동의하셔야 검색할 수 있으며, 수집된 정보의 열람·삭제는{" "}
+            <a
+              href="#contact"
+              className="font-semibold text-blue-600 hover:underline"
+            >
+              하단 문의하기
+            </a>
+            로 요청할 수 있어요.
+          </span>
+        </label>
+
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !consent}
           className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3.5 text-base font-bold text-white shadow-lg shadow-blue-600/20 transition hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "라이지가 찾는 중… 🔍" : "맞춤 지원사업 추천받기"}
@@ -623,8 +659,49 @@ export default function Home() {
       </footer>
         </>
       )}
+      {/* 문의·개인정보 요청 창구 — 모든 화면 최하단에 노출 */}
+      <ContactSection />
       </main>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 문의하기 — 개인정보(열람·정정·삭제) 및 일반 문의 창구 (메일 직접 수신)
+// ---------------------------------------------------------------------------
+
+/**
+ * 페이지 최하단 문의 섹션.
+ * 별도 백엔드 없이 mailto로 연결한다. 개인정보 열람·정정·삭제 요청 창구를 겸하며,
+ * 동의 체크박스의 "하단 문의하기" 링크(#contact)가 여기로 스크롤된다.
+ */
+function ContactSection() {
+  const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+    "[Brand Rise] 문의",
+  )}`;
+  return (
+    <section
+      id="contact"
+      className="mt-12 scroll-mt-20 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
+    >
+      <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+        📩 문의하기
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+        <b>개인정보 관련 문의</b>(수집·이용 내역 열람, 정정, 삭제 요청)나{" "}
+        <b>그 밖의 궁금한 점</b>은 아래 메일로 보내주세요.
+      </p>
+      <a
+        href={mailto}
+        className="mt-3 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+      >
+        ✉️ {CONTACT_EMAIL}
+      </a>
+      <p className="mt-3 text-xs text-gray-400">
+        ※ 개인정보의 열람·정정·삭제 요청은 이 메일로 접수되며, 본인 확인 후 지체
+        없이 처리합니다.
+      </p>
+    </section>
   );
 }
 

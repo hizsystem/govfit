@@ -5,6 +5,8 @@ interface SearchMeta {
   aiUsed: boolean;
   dataSource: string;
   sessionId?: string;
+  /** 개인정보 수집·이용 동의 여부 (동의자만 검색 정책의 저장 증빙) */
+  consent?: boolean;
 }
 
 /**
@@ -26,6 +28,7 @@ export async function logSearch(
     kind: "search",
     ts: new Date().toISOString(),
     sessionId: meta.sessionId ?? "",
+    consent: meta.consent ?? false,
     preFounder: company.preFounder,
     industry: company.industry,
     region: company.region,

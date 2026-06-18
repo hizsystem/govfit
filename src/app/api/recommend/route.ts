@@ -16,10 +16,11 @@ export const maxDuration = 30;
  * 추천 지원사업 목록을 반환한다.
  */
 export async function POST(request: Request) {
-  let raw: Partial<CompanyProfile> & { sessionId?: string };
+  let raw: Partial<CompanyProfile> & { sessionId?: string; consent?: boolean };
   try {
     raw = (await request.json()) as Partial<CompanyProfile> & {
       sessionId?: string;
+      consent?: boolean;
     };
   } catch {
     return NextResponse.json(
@@ -31,6 +32,15 @@ export async function POST(request: Request) {
   if (!raw.industry || !raw.region) {
     return NextResponse.json(
       { error: "업종과 지역은 필수 입력입니다." },
+      { status: 400 },
+    );
+  }
+
+  // 동의자만 검색 정책 — 개인정보 수집·이용 동의 없이는 처리·저장하지 않는다.
+  // 클라이언트가 버튼을 막지만, 직접 호출로 우회되는 저장을 서버에서도 차단한다.
+  if (raw.consent !== true) {
+    return NextResponse.json(
+      { error: "개인정보 수집·이용 동의가 필요합니다." },
       { status: 400 },
     );
   }
@@ -82,6 +92,7 @@ export async function POST(request: Request) {
       aiUsed,
       dataSource: source,
       sessionId: typeof raw.sessionId === "string" ? raw.sessionId : undefined,
+      consent: true, // 위에서 동의를 검증했으므로 항상 true (저장 증빙용)
     }),
   );
 
