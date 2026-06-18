@@ -5,9 +5,10 @@ import { clean, truncate, summarize, extractPurpose } from "@/lib/data/bizinfo";
 /**
  * 온통청년(한국고용정보원) 청년정책 OpenAPI 연동.
  *
- * 청년 대상 정책 중 GovFit 도메인(기업·창업·취업 지원사업)에 맞는 것만 가져온다.
- * 온통청년은 주거·복지·문화·참여 등 개인 대상 정책이 많아, 대분류(lclsfNm)가
- * '일자리' 또는 '교육·직업훈련'인 것만 추려 노이즈를 막는다.
+ * 청년 대상 정책 중 창업·기업지원·소상공인 관련만 가져온다.
+ * 온통청년은 청년 "개인" 대상 혜택(응시료·교통비·면접정장 등)이 대부분이라,
+ * 제목·키워드·중분류·지원대상에 창업/기업/소상공인 신호가 있는 것만 추린다.
+ * (대분류로만 거르면 개인 혜택이 다수 섞여 노이즈가 컸음)
  * - 인증키(YOUTH_API_KEY)는 온통청년(youthcenter.go.kr) 로그인 → 마이페이지 →
  *   OPEN API 신청 후 발급(심사형). data.go.kr serviceKey와 다른 UUID 형식이다.
  * - 키가 없거나 호출이 실패하면 예외를 던지고, 상위 로더가 다른 소스로 폴백한다.
@@ -56,12 +57,23 @@ interface YouthResponse {
 }
 
 /**
- * GovFit 도메인에 맞는 대분류만 통과시킨다.
- * '일자리'(취업·창업)와 '교육'(교육·직업훈련)만 사용하고, 주거·복지문화·참여기반은 제외.
- * (대분류 값에 특수 가운뎃점이 섞여 있어, '교육'은 startsWith로 안전하게 판별한다)
+ * 창업·기업지원·소상공인 신호 키워드로 거른다. 대분류로만 거르면 청년 개인
+ * 혜택(응시료·교통비·인턴 등)이 많이 섞이므로, 더 정밀하게 키워드로 판별한다.
+ * 긴 설명문(plcyExplnCn)은 '중소기업' 등이 우연히 섞여 오탐을 내므로 제외하고,
+ * 제목·키워드·중분류·지원대상에만 매칭한다. (창업 자금이 '금융' 대분류에 있는
+ * 경우도 있어, 대분류 게이트 없이 전 분류에서 키워드로 추린다)
  */
-function isBusinessRelevant(lclsf: string): boolean {
-  return lclsf === "일자리" || lclsf.startsWith("교육");
+const TARGET_RE =
+  /창업|스타트업|소상공인|자영업|자영자|점포|매장|상점|벤처|중소기업|기업\s*지원|판로|기술개발|사업화|로컬크리에이터|청년몰|사업자|창업가/;
+
+function isTargetPolicy(item: YouthItem): boolean {
+  const text = [
+    clean(item.plcyNm),
+    clean(item.plcyKywdNm),
+    clean(item.mclsfNm),
+    clean(item.ptcpPrpTrgtCn),
+  ].join(" ");
+  return TARGET_RE.test(text);
 }
 
 /**
@@ -108,7 +120,7 @@ async function fetchYouthPage(key: string, page: number): Promise<SupportProgram
   if (!Array.isArray(items)) throw new Error("온통청년 응답 형식 오류");
 
   return items
-    .filter((it) => isBusinessRelevant(clean(it.lclsfNm)))
+    .filter(isTargetPolicy)
     .map(toSupportProgram)
     .filter((p): p is SupportProgram => p !== null);
 }
