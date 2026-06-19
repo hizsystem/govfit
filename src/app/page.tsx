@@ -12,7 +12,9 @@ import type {
   CompanyProfile,
   RecommendResponse,
   Recommendation,
+  SupportProgram,
 } from "@/lib/types";
+import { BrowseView } from "@/components/BrowseView";
 import { buildProposal, type ProposalFormat } from "@/lib/proposal";
 import { buildNewsletter, type CategoryGroup } from "@/lib/newsletter";
 import { track, getSessionId } from "@/lib/track";
@@ -80,9 +82,9 @@ export default function Home() {
   const [bookmarks, setBookmarks] = useState<Record<string, Recommendation>>({});
   // 마이페이지 프로필 (디지털 명함 등)
   const [myProfile, setMyProfile] = useState<MyProfile>(EMPTY_MYPROFILE);
-  // 화면 전환: 검색 / 관심공고 / 공고 사이트 모음 / 뉴스레터 / 마이페이지 / 소개
+  // 화면 전환: 검색 / 전체공고 / 관심공고 / 공고 사이트 모음 / 뉴스레터 / 마이페이지 / 소개
   const [view, setView] = useState<
-    "search" | "saved" | "sites" | "newsletter" | "mypage" | "intro"
+    "search" | "browse" | "saved" | "sites" | "newsletter" | "mypage" | "intro"
   >("search");
   // 관심공고 화면 진입 시 초기 보기 모드 (마이페이지 타일에서 캘린더/목록 지정)
   const [savedMode, setSavedMode] = useState<"calendar" | "list">("calendar");
@@ -190,6 +192,18 @@ export default function Home() {
       programId: id,
       programTitle: rec.program.title,
       value: adding ? "on" : "off",
+    });
+  }
+
+  // 전체 공고 둘러보기에서의 찜하기 — 추천(score)이 없으니 최소 Recommendation으로 감싼다.
+  // 찜 저장소가 program.id 기준이라 추천 화면 찜과 그대로 호환된다.
+  function toggleBookmarkProgram(program: SupportProgram) {
+    toggleBookmark({
+      program,
+      score: 0,
+      reason: "",
+      matchedReasons: [],
+      matchedKeywords: [],
     });
   }
 
@@ -414,6 +428,11 @@ export default function Home() {
         />
       ) : view === "newsletter" ? (
         <NewsletterView />
+      ) : view === "browse" ? (
+        <BrowseView
+          isSaved={(id) => !!bookmarks[id]}
+          onToggleSave={toggleBookmarkProgram}
+        />
       ) : view === "sites" ? (
         <SitesView />
       ) : view === "saved" ? (
@@ -426,6 +445,32 @@ export default function Home() {
         />
       ) : (
         <>
+      {/* 전체 공고 둘러보기 진입 배너 — 추천 검색 없이 모은 공고를 바로 보고 검색 */}
+      <button
+        type="button"
+        onClick={() => setView("browse")}
+        className="group mb-6 flex w-full items-center gap-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-blue-50 px-5 py-4 text-left transition hover:border-indigo-300 hover:shadow-md dark:border-indigo-900/40 dark:from-indigo-950/30 dark:to-blue-950/30"
+      >
+        <span className="text-2xl">📋</span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-gray-900 dark:text-gray-100">
+            우리가 모은 전체 공고
+            {stats && stats.total > 0 && (
+              <b className="text-indigo-600 dark:text-indigo-400">
+                {" "}
+                {stats.total.toLocaleString()}건
+              </b>
+            )}{" "}
+            바로 둘러보기
+          </span>
+          <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">
+            추천 검색 없이도 지금 신청 가능한 공고를 직접 보고 검색할 수 있어요.
+          </span>
+        </span>
+        <span className="shrink-0 text-sm font-semibold text-indigo-600 transition group-hover:translate-x-0.5 dark:text-indigo-400">
+          →
+        </span>
+      </button>
       <form
         onSubmit={handleSubmit}
         className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8 dark:border-gray-800 dark:bg-gray-900"
