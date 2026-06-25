@@ -99,6 +99,8 @@ export default function Home() {
   // 인증 (카카오/구글 소셜 로그인 — Supabase). 키 미설정 시 자동 비활성.
   const auth = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  // 모바일 햄버거 메뉴 열림 상태
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // 로그인 필수 기능인데 미로그인이면 게이트 표시
   const needsLogin =
     auth.configured && !auth.user && (view === "saved" || view === "mypage");
@@ -292,67 +294,47 @@ export default function Home() {
               alt="Brand Rise 로고"
               className="h-9 w-9 rounded-lg object-cover"
             />
-            <span className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+            {/* 모바일에서는 브랜드명 숨김 (로고만) */}
+            <span className="hidden text-lg font-extrabold tracking-tight text-gray-900 md:inline dark:text-gray-100">
               Brand Rise
             </span>
           </button>
-          <div className="flex flex-wrap items-center justify-end gap-1 md:gap-1.5">
-            <button
-              type="button"
+
+          {/* 데스크톱 메뉴 */}
+          <div className="hidden flex-wrap items-center justify-end gap-1 md:flex md:gap-2">
+            <NavTab
+              active={view === "newsletter"}
               onClick={() =>
                 setView((v) => (v === "newsletter" ? "search" : "newsletter"))
               }
-              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
-                view === "newsletter"
-                  ? "border border-blue-600 bg-blue-600 text-white"
-                  : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-              }`}
             >
-              📰 뉴스레터 구독
-            </button>
-            <button
-              type="button"
+              뉴스레터 구독
+            </NavTab>
+            <NavTab
+              active={view === "sites"}
               onClick={() => setView((v) => (v === "sites" ? "search" : "sites"))}
-              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
-                view === "sites"
-                  ? "border border-blue-600 bg-blue-600 text-white"
-                  : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-              }`}
             >
-              🔗 공고 사이트 모음
-            </button>
-            <button
-              type="button"
-              onClick={() => openSaved("calendar")}
-              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
-                view === "saved"
-                  ? "border border-blue-600 bg-blue-600 text-white"
-                  : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-              }`}
-            >
-              🔖 관심공고 {savedList.length}
-            </button>
-            <button
-              type="button"
+              공고 사이트 모음
+            </NavTab>
+            <NavTab active={view === "saved"} onClick={() => openSaved("calendar")}>
+              관심공고 {savedList.length}
+            </NavTab>
+            <NavTab
+              active={view === "mypage"}
               onClick={() => setView((v) => (v === "mypage" ? "search" : "mypage"))}
-              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
-                view === "mypage"
-                  ? "border border-blue-600 bg-blue-600 text-white"
-                  : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-              }`}
             >
-              👤 마이페이지
-            </button>
+              마이페이지
+            </NavTab>
             {auth.configured &&
               (auth.user ? (
-                <div className="flex shrink-0 items-center gap-1">
-                  <span className="hidden max-w-[8rem] truncate text-xs font-semibold text-gray-600 sm:inline dark:text-gray-300">
+                <div className="flex shrink-0 items-center gap-1 pl-1">
+                  <span className="hidden max-w-[8rem] truncate text-xs font-semibold text-gray-600 lg:inline dark:text-gray-300">
                     {displayUserName(auth.user)}님
                   </span>
                   <button
                     type="button"
                     onClick={() => auth.signOut()}
-                    className="rounded-xl border border-gray-300 px-1.5 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-400 sm:px-2.5 sm:py-2 sm:text-sm dark:border-gray-700 dark:text-gray-300"
+                    className="shrink-0 px-2 py-4 text-sm font-semibold text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                   >
                     로그아웃
                   </button>
@@ -361,13 +343,110 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setShowLogin(true)}
-                  className="shrink-0 rounded-xl bg-blue-600 px-1.5 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700 sm:px-2.5 sm:py-2 sm:text-sm"
+                  className="ml-1 shrink-0 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
                 >
                   로그인
                 </button>
               ))}
           </div>
+
+          {/* 모바일 햄버거 버튼 */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            aria-label="메뉴"
+            aria-expanded={mobileMenuOpen}
+            className="grid h-10 w-10 place-items-center rounded-lg text-gray-700 transition hover:bg-gray-100 md:hidden dark:text-gray-200 dark:hover:bg-gray-800"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              {mobileMenuOpen ? (
+                <>
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                  <line x1="6" y1="18" x2="18" y2="6" />
+                </>
+              ) : (
+                <>
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                </>
+              )}
+            </svg>
+          </button>
         </div>
+
+        {/* 모바일 메뉴 패널 — 콘텐츠를 밀지 않고 위에 얹히도록 absolute */}
+        {mobileMenuOpen && (
+          <div className="absolute inset-x-0 top-full z-50 border-t border-gray-200 bg-white px-3 py-2 shadow-lg md:hidden dark:border-gray-800 dark:bg-gray-900">
+            <MobileNavItem
+              active={view === "newsletter"}
+              onClick={() => {
+                setView((v) => (v === "newsletter" ? "search" : "newsletter"));
+                setMobileMenuOpen(false);
+              }}
+            >
+              뉴스레터 구독
+            </MobileNavItem>
+            <MobileNavItem
+              active={view === "sites"}
+              onClick={() => {
+                setView((v) => (v === "sites" ? "search" : "sites"));
+                setMobileMenuOpen(false);
+              }}
+            >
+              공고 사이트 모음
+            </MobileNavItem>
+            <MobileNavItem
+              active={view === "saved"}
+              onClick={() => {
+                openSaved("calendar");
+                setMobileMenuOpen(false);
+              }}
+            >
+              관심공고 {savedList.length}
+            </MobileNavItem>
+            <MobileNavItem
+              active={view === "mypage"}
+              onClick={() => {
+                setView((v) => (v === "mypage" ? "search" : "mypage"));
+                setMobileMenuOpen(false);
+              }}
+            >
+              마이페이지
+            </MobileNavItem>
+            {auth.configured &&
+              (auth.user ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    auth.signOut();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full rounded-lg px-3 py-3 text-left text-sm font-semibold text-gray-500 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800"
+                >
+                  로그아웃 ({displayUserName(auth.user)}님)
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLogin(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="mt-1 w-full rounded-lg bg-blue-600 px-3 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
+                >
+                  로그인
+                </button>
+              ))}
+          </div>
+        )}
       </nav>
 
       {showLogin && (
@@ -414,7 +493,6 @@ export default function Home() {
         <IntroView
           stats={stats}
           onStart={() => setView("search")}
-          onOpenMypage={() => setView("mypage")}
           onOpenNewsletter={() => setView("newsletter")}
         />
       ) : view === "mypage" ? (
@@ -690,10 +768,10 @@ export default function Home() {
             수집·이용합니다. (목적: 지원사업 매칭 및 서비스 개선 · 보유기간:
             수집일로부터 1년) 동의하셔야 검색할 수 있으며, 관련 문의는{" "}
             <a
-              href="#contact"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="font-semibold text-blue-600 hover:underline"
             >
-              하단 문의하기
+              이메일
             </a>
             로 연락 주세요.
           </span>
@@ -725,57 +803,167 @@ export default function Home() {
       </footer>
         </>
       )}
-      {/* 문의·개인정보 요청 창구 — 모든 화면 최하단에 노출 */}
-      <ContactSection />
       </main>
+      {/* 우하단 고정 문의 버튼 — 모든 화면에서 메일/전화 바로가기 */}
+      <FloatingContact />
     </>
   );
 }
 
+/**
+ * 상단 네비게이션 탭 — 외곽선·배경 없는 텍스트 버튼.
+ * hover/활성 시 글자가 하이라이트(주황)로 바뀌고 버튼 폭만큼 하단 바가 채워진다.
+ */
+function NavTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative shrink-0 px-2 py-4 text-xs font-semibold transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full after:bg-blue-600 after:transition-transform after:duration-200 after:content-[''] sm:px-3 sm:text-sm ${
+        active
+          ? "text-blue-600 after:scale-x-100 dark:text-blue-400"
+          : "text-gray-600 after:scale-x-0 hover:text-blue-600 hover:after:scale-x-100 dark:text-gray-300 dark:hover:text-blue-400"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** 모바일 햄버거 메뉴 안의 세로 항목 버튼. */
+function MobileNavItem({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full rounded-lg px-3 py-3 text-left text-sm font-semibold transition-colors ${
+        active
+          ? "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400"
+          : "text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 // ---------------------------------------------------------------------------
-// 문의하기 — 개인정보(열람·정정·삭제) 및 일반 문의 창구 (메일 직접 수신)
+// 우하단 고정 문의 버튼 — BR 로고 FAB을 누르면 메일/전화 원형 버튼이 펼쳐진다
 // ---------------------------------------------------------------------------
 
-/**
- * 페이지 최하단 문의 섹션.
- * 별도 백엔드 없이 mailto로 연결한다. 개인정보 열람·정정·삭제 요청 창구를 겸하며,
- * 동의 체크박스의 "하단 문의하기" 링크(#contact)가 여기로 스크롤된다.
- */
-function ContactSection() {
-  const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-    "[Brand Rise] 문의",
-  )}`;
+/** 우하단에 고정되어 모든 화면에서 메일·전화를 클립보드로 복사하는 플로팅 버튼. */
+function FloatingContact() {
+  const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // 토스트는 2초 후 자동으로 사라진다
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  function copy(text: string, message: string) {
+    setOpen(false);
+    const done = () => {
+      // 같은 메시지를 다시 띄울 수 있도록 잠깐 비웠다가 설정 (애니메이션 재시작)
+      setToast(null);
+      setTimeout(() => setToast(message), 10);
+    };
+    navigator.clipboard?.writeText(text).then(done).catch(done);
+  }
+
   return (
-    <section
-      id="contact"
-      className="mt-12 scroll-mt-20 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
-    >
-      <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
-        📩 문의하기
-      </h2>
-      <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-        <b>개인정보 관련 문의</b>나 <b>그 밖의 궁금한 점</b>은 아래 메일로 연락
-        주세요.
-      </p>
-      <a
-        href={mailto}
-        className="mt-3 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-      >
-        ✉️ {CONTACT_EMAIL}
-      </a>
-      <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-        고객지원·서비스장애·제휴·제안·기타 문의 :{" "}
-        <a
-          href={`tel:${CONTACT_PHONE_TEL}`}
-          className="font-semibold text-blue-600 hover:underline"
+    <>
+      {/* 메뉴가 열렸을 때: 바깥 영역 탭하면 닫힘 */}
+      {open && (
+        <button
+          type="button"
+          aria-hidden
+          tabIndex={-1}
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-40 cursor-default"
+        />
+      )}
+
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3">
+        {/* 펼쳐지는 메일/전화 버튼 (Material 아이콘) */}
+        <div
+          className={`flex flex-col items-center gap-3 transition-all duration-200 ${
+            open
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-2 opacity-0"
+          }`}
         >
-          {CONTACT_PHONE_DISPLAY}
-        </a>
-      </p>
-      <p className="mt-3 text-xs text-gray-400">
-        ※ 영업일 기준으로 순차적으로 답변드립니다.
-      </p>
-    </section>
+          <button
+            type="button"
+            onClick={() => copy(CONTACT_EMAIL, "이메일주소가 복사되었습니다!")}
+            aria-label="이메일 주소 복사"
+            title="이메일 주소 복사"
+            className="grid h-12 w-12 place-items-center rounded-full bg-white text-blue-600 shadow-lg ring-1 ring-gray-200 transition hover:bg-blue-50 dark:bg-gray-900 dark:ring-gray-700"
+          >
+            {/* Material Symbols: mail */}
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              copy(CONTACT_PHONE_DISPLAY, "전화번호가 복사되었습니다!")
+            }
+            aria-label="전화번호 복사"
+            title="전화번호 복사"
+            className="grid h-12 w-12 place-items-center rounded-full bg-white text-blue-600 shadow-lg ring-1 ring-gray-200 transition hover:bg-blue-50 dark:bg-gray-900 dark:ring-gray-700"
+          >
+            {/* Material Symbols: call */}
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+            </svg>
+          </button>
+        </div>
+        {/* 메인 BR 버튼 (다시 누르면 닫힘) */}
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-label="문의하기"
+          aria-expanded={open}
+          className="h-14 w-14 overflow-hidden rounded-full shadow-xl ring-1 ring-black/5 transition hover:scale-105"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand-logo.svg"
+            alt="문의하기"
+            className="h-full w-full object-cover"
+          />
+        </button>
+      </div>
+
+      {/* 복사 완료 토스트 — 화면 하단 가운데, 회색 둥근 박스 */}
+      {toast && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-8 z-[60] flex justify-center px-4">
+          <div className="animate-toast rounded-xl bg-gray-800/95 px-5 py-3 text-sm font-medium text-white shadow-lg dark:bg-gray-700/95">
+            {toast}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1670,33 +1858,132 @@ const INTRO_STEPS = [
     no: "02",
     icon: "🎯",
     title: "적합도 추천 받기",
-    desc: "조건에 맞는 지원사업을 골라 적합도 점수와 추천 이유까지 보여드려요.",
+    desc: "조건에 맞는 지원사업을 골라\n적합도 점수와 추천 이유까지 보여드려요.",
     glow: "247,148,30", // 브랜드 주황
   },
   {
     no: "03",
     icon: "🚀",
     title: "담고 · 관리하고 · 신청",
-    desc: "관심공고를 담아 마감 캘린더로 챙기고, 사업계획서 초안으로 신청을 준비하세요.",
+    desc: "관심공고를 담아 마감 캘린더로 챙기고,\n사업계획서 초안으로 신청을 준비하세요.",
     glow: "238,84,31", // 코랄
   },
 ] as const;
 
+/** 기능 카드 한 장 — 그라데이션 일러스트 배경 + 흰 글자 (그리드·캐러셀 공용) */
+function FeatureCard({ f }: { f: (typeof INTRO_FEATURES)[number] }) {
+  return (
+    <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={f.img}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* 흰 글자 가독성을 위한 옅은 스크림 (카드를 맑게 — 농도 낮춤) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/5 to-transparent" />
+      <div className="relative flex h-full flex-col p-6">
+        <h3 className="text-lg font-bold text-white drop-shadow">{f.title}</h3>
+        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-white/95 drop-shadow">
+          {f.desc}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 모바일 전용 기능 카드 캐러셀.
+ * 현재 카드가 가운데, 양옆에 이전/다음 카드가 살짝 보이고, 4초마다 오른쪽→왼쪽으로
+ * 무한 루프된다. (앞뒤에 클론을 두고 경계에서 트랜지션 없이 순간 점프)
+ */
+function FeatureCarousel() {
+  const n = INTRO_FEATURES.length;
+  // 앞: 마지막 클론 / 뒤: 첫 클론 — 양끝에서도 이웃 카드가 보이게
+  const slides = [
+    INTRO_FEATURES[n - 1],
+    ...INTRO_FEATURES,
+    INTRO_FEATURES[0],
+  ];
+  const [pos, setPos] = useState(1); // 1..n 이 실제 카드
+  const [anim, setAnim] = useState(true);
+
+  // 4초마다 다음 카드로 전진
+  useEffect(() => {
+    const t = setInterval(() => setPos((p) => p + 1), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  // 클론에 도달하면 트랜지션 없이 실제 카드로 순간 점프 → 무한 루프
+  function handleEnd() {
+    if (pos >= n + 1) {
+      setAnim(false);
+      setPos(1);
+    } else if (pos <= 0) {
+      setAnim(false);
+      setPos(n);
+    }
+  }
+  // 점프 후 다음 틱에 트랜지션 복원
+  useEffect(() => {
+    if (!anim) {
+      const id = setTimeout(() => setAnim(true), 50);
+      return () => clearTimeout(id);
+    }
+  }, [anim]);
+
+  const real = (pos - 1 + n) % n;
+  // 카드 폭 80% → translateX(10% - pos*80%)면 pos 카드가 화면 중앙, 양옆 10%씩 이웃이 보임
+  return (
+    <div className="md:hidden">
+      {/* overflow-x만 잘라 가로 이웃은 숨기고, 세로(hover 그림자)는 보이게 */}
+      <div className="overflow-x-clip py-3">
+        <div
+          className={`flex ${anim ? "transition-transform duration-500 ease-out" : ""}`}
+          style={{ transform: `translateX(${10 - pos * 80}%)` }}
+          onTransitionEnd={handleEnd}
+        >
+          {slides.map((f, i) => (
+            <div key={i} className="w-[80%] shrink-0 px-2">
+              <FeatureCard f={f} />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* 네비게이터(점) */}
+      <div className="mt-4 flex items-center justify-center gap-2">
+        {INTRO_FEATURES.map((f, i) => (
+          <button
+            key={f.title}
+            type="button"
+            onClick={() => setPos(i + 1)}
+            aria-label={`${i + 1}번째 카드 보기`}
+            className={`h-2 rounded-full transition-all ${
+              i === real ? "w-6 bg-blue-600" : "w-2 bg-gray-300 dark:bg-gray-700"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function IntroView({
   stats,
   onStart,
-  onOpenMypage,
   onOpenNewsletter,
 }: {
   stats: { total: number; cumulative: number; sourceCount: number } | null;
   onStart: () => void;
-  onOpenMypage: () => void;
   onOpenNewsletter: () => void;
 }) {
   return (
-    <div className="space-y-14 pb-10">
+    <div>
       {/* 히어로 */}
-      <section className="full-bleed relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 py-16 text-center text-white shadow-xl sm:py-24">
+      <section className="full-bleed relative -mt-8 overflow-hidden bg-blue-600 py-16 text-center text-white sm:py-24">
+        {/* 아주 천천히 회전하는 배경 그라데이션 (200% 크기라 회전해도 빈 곳이 없음) */}
+        <div className="animate-slow-spin pointer-events-none absolute inset-[-50%] bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600" />
         <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-violet-300/20 blur-3xl" />
 
@@ -1716,8 +2003,9 @@ function IntroView({
             내게 맞는 것만 한 곳에서
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
-            수많은 공공기관에 흩어진 지원사업 공고를 실시간으로 모아, 우리 회사
-            조건에 맞는 사업만 골라 적합도 순으로 추천해드립니다.
+            우리 회사 조건에 맞는 정부 지원 사업 공고만 골라
+            <br />
+            적합도 순으로 추천해드립니다.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <button
@@ -1726,13 +2014,6 @@ function IntroView({
               className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50 sm:text-base"
             >
               🔍 내게 맞는 지원사업 찾기
-            </button>
-            <button
-              type="button"
-              onClick={onOpenMypage}
-              className="rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20 sm:text-base"
-            >
-              👤 마이페이지
             </button>
           </div>
           {stats && (stats.cumulative > 0 || stats.total > 0) && (
@@ -1748,8 +2029,8 @@ function IntroView({
         </div>
       </section>
 
-      {/* 신뢰 지표 */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* 신뢰 지표 — 박스 없이 구분선으로 나눈 스탯 */}
+      <section className="mt-14 flex items-stretch justify-center divide-x divide-gray-200 dark:divide-gray-800">
         {[
           {
             big:
@@ -1769,17 +2050,14 @@ function IntroView({
           },
           { big: "맞춤", label: "조건 기반 적합도 점수", sub: "추천 이유까지 제공" },
         ].map((s) => (
-          <div
-            key={s.label}
-            className="rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900"
-          >
-            <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">
+          <div key={s.label} className="flex-1 px-3 text-center sm:px-8">
+            <div className="text-2xl font-extrabold text-blue-600 sm:text-3xl dark:text-blue-400">
               {s.big}
             </div>
-            <div className="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100">
+            <div className="mt-1.5 text-xs font-bold text-gray-900 sm:text-sm dark:text-gray-100">
               {s.label}
             </div>
-            <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            <div className="mt-1 hidden text-xs text-gray-500 sm:block dark:text-gray-400">
               {s.sub}
             </div>
           </div>
@@ -1787,7 +2065,7 @@ function IntroView({
       </section>
 
       {/* 주요 기능 */}
-      <section>
+      <section className="mt-14">
         <div className="mb-7 text-center">
           <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
             이런 기능이 있어요
@@ -1796,42 +2074,21 @@ function IntroView({
             찾기부터 관리·신청 준비까지, 한 곳에서 끝내세요.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* 데스크톱: 그리드 */}
+        <div className="hidden gap-5 md:grid md:grid-cols-2 lg:grid-cols-3">
           {INTRO_FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={f.img}
-                alt=""
-                aria-hidden
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              {/* 흰 글자 가독성을 위한 옅은 스크림 (일러스트는 톤온톤이라 은은) */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/12 to-transparent" />
-              <div className="relative flex h-full flex-col p-6">
-                <h3 className="text-lg font-bold text-white drop-shadow-sm">
-                  {f.title}
-                </h3>
-                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-white/90 drop-shadow-sm">
-                  {f.desc}
-                </p>
-              </div>
-            </div>
+            <FeatureCard key={f.title} f={f} />
           ))}
         </div>
+        {/* 모바일: 캐러셀 */}
+        <FeatureCarousel />
       </section>
 
       {/* 이용 방법 — 가로 꽉 채우는 프로세스 흐름 */}
-      <section className="full-bleed bg-gradient-to-b from-blue-50/70 via-white to-white py-14 sm:py-20 dark:from-blue-950/20 dark:via-gray-950 dark:to-gray-950">
+      <section className="full-bleed mt-14 bg-gray-50 py-14 sm:py-20 dark:bg-gray-950">
         <div className="mx-auto max-w-5xl px-6">
           <div className="text-center">
-            <span className="text-xs font-bold tracking-[0.2em] text-blue-600 dark:text-blue-400">
-              HOW IT WORKS
-            </span>
-            <h2 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
               3단계면 충분해요
             </h2>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -1859,24 +2116,34 @@ function IntroView({
                   </li>
                 )}
                 <li className="flex flex-col items-center text-center lg:w-64 lg:flex-none">
+                  {/* STEP + 숫자 (그라데이션 원 안, 줄바꿈 / 숫자 강조) */}
                   <div
                     className="grid h-44 w-44 place-items-center rounded-full"
                     style={{
                       background: `radial-gradient(circle at center, rgba(${s.glow},0.5) 0%, rgba(${s.glow},0.14) 48%, rgba(${s.glow},0) 75%)`,
                     }}
                   >
-                    <span className="text-5xl drop-shadow-sm">{s.icon}</span>
+                    <span
+                      className="flex flex-col items-center leading-none"
+                      style={{ color: `rgb(${s.glow})` }}
+                    >
+                      {/* pl로 letter-spacing 끝 여백을 보정해 가운데 정렬 */}
+                      <span className="pl-[0.35em] text-sm font-bold tracking-[0.35em]">
+                        STEP
+                      </span>
+                      <span className="mt-1.5 text-6xl font-extrabold tracking-tight">
+                        {s.no}
+                      </span>
+                    </span>
                   </div>
-                  <span
-                    className="mt-5 text-xs font-bold tracking-[0.2em]"
-                    style={{ color: `rgb(${s.glow})` }}
-                  >
-                    STEP {s.no}
-                  </span>
-                  <h3 className="mt-1.5 text-lg font-bold text-gray-900 dark:text-gray-100">
+                  {/* 아이콘 */}
+                  <span className="mt-5 text-3xl drop-shadow-sm">{s.icon}</span>
+                  {/* 타이틀 */}
+                  <h3 className="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">
                     {s.title}
                   </h3>
-                  <p className="mt-2 max-w-[18rem] text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  {/* 내용 */}
+                  <p className="mt-2 max-w-[18rem] whitespace-pre-line text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                     {s.desc}
                   </p>
                 </li>
@@ -1886,50 +2153,136 @@ function IntroView({
         </div>
       </section>
 
-      {/* 마무리 CTA */}
-      <section className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 px-6 py-12 text-center text-white shadow-lg sm:px-10">
-        <h2 className="text-2xl font-bold sm:text-3xl">
-          우리 회사에 맞는 지원사업, 지금 확인하세요
-        </h2>
-        <p className="mt-2 text-sm text-blue-100">
-          회원가입 없이 바로 시작할 수 있어요.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={onStart}
-            className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50"
-          >
-            🔍 지금 추천받기
-          </button>
-          <button
-            type="button"
-            onClick={onOpenNewsletter}
-            className="rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
-          >
-            📰 뉴스레터 보기
-          </button>
+      {/* 마무리 CTA — 가로 꽉 채우는 밝은 배경 */}
+      <section className="full-bleed bg-gradient-to-br from-blue-500 to-indigo-400 py-14 text-center text-white sm:py-20">
+        <div className="mx-auto max-w-3xl px-6 sm:px-10">
+          <h2 className="text-2xl font-bold sm:text-3xl">
+            우리 회사에 맞는 지원 사업,
+            <br />
+            지금 확인하세요
+          </h2>
+          <p className="mt-2 text-sm text-white/90">
+            회원가입 없이 바로 시작할 수 있어요.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={onStart}
+              className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50"
+            >
+              🔍 지금 추천받기
+            </button>
+            <button
+              type="button"
+              onClick={onOpenNewsletter}
+              className="rounded-xl border border-white/50 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
+            >
+              📰 뉴스레터 보기
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* 푸터 */}
-      <footer className="border-t border-gray-200 pt-8 text-center text-xs text-gray-400 dark:border-gray-800">
-        <div className="flex items-center justify-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/brand-logo.svg"
-            alt="Brand Rise"
-            className="h-6 w-6 rounded-md object-cover"
-          />
-          <span className="font-bold text-gray-600 dark:text-gray-300">
-            Brand Rise
-          </span>
+      {/* 푸터 — 전폭 구분선 + 4단 그리드 (페이지 맨 바닥, main의 하단 패딩 상쇄) */}
+      <footer className="full-bleed -mb-8 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
+        <div className="mx-auto max-w-5xl px-6 py-9">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+            {/* 1. 로고 + 상호명 */}
+            <div className="col-span-2 sm:col-span-1">
+              <div className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/brand-logo.svg"
+                  alt="Brand Rise"
+                  className="h-8 w-8 rounded-lg object-cover"
+                />
+                <span className="text-base font-extrabold text-gray-900 dark:text-gray-100">
+                  Brand Rise
+                </span>
+              </div>
+              <p className="mt-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                브랜드라이즈
+              </p>
+              <p className="mt-0.5 text-xs text-gray-400">정부지원사업 추천 플랫폼</p>
+            </div>
+
+            {/* 2. 문의 */}
+            <div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                문의
+              </h4>
+              <ul className="mt-2.5 space-y-1 text-xs leading-snug text-gray-500 dark:text-gray-400">
+                <li>
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                </li>
+                <li>개인정보 열람·정정·삭제 문의</li>
+              </ul>
+            </div>
+
+            {/* 3. 고객지원 */}
+            <div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                고객지원
+              </h4>
+              <ul className="mt-2.5 space-y-1 text-xs leading-snug text-gray-500 dark:text-gray-400">
+                <li>
+                  <a
+                    href={`tel:${CONTACT_PHONE_TEL}`}
+                    className="hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    {CONTACT_PHONE_DISPLAY}
+                  </a>
+                </li>
+                <li>고객지원·서비스·제휴 등 기타 문의</li>
+              </ul>
+            </div>
+
+            {/* 4. SNS */}
+            <div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                SNS
+              </h4>
+              <ul className="mt-2.5 space-y-1 text-xs leading-snug text-gray-500 dark:text-gray-400">
+                <li>
+                  <a
+                    href="https://www.instagram.com/brandrise_kr/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    브랜드라이즈 인스타그램
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.instagram.com/goventureforum/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-600 dark:hover:text-blue-400"
+                  >
+                    고벤처포럼 인스타그램
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* 하단: 공공데이터 안내 + 카피라이트 */}
+          <div className="mt-6 border-t border-gray-100 pt-4 dark:border-gray-800/70">
+            <p className="text-xs leading-snug text-gray-400">
+              공공 데이터(기업마당·K-Startup 등)를 활용하며, 실제 신청·자격 요건은
+              각 공고 원문을 확인하세요.
+            </p>
+            <p className="mt-1.5 text-xs text-gray-400">
+              © 2026 Brand Rise · 브랜드라이즈
+            </p>
+          </div>
         </div>
-        <p className="mt-2">정부지원사업 추천 플랫폼 · 브랜드라이즈</p>
-        <p className="mt-1">
-          공공 데이터(기업마당·K-Startup 등)를 활용하며, 실제 신청·자격 요건은 각
-          공고 원문을 확인하세요.
-        </p>
       </footer>
     </div>
   );

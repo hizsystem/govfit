@@ -138,9 +138,24 @@ html {
 .rise-blink { animation: rise-blink 4.2s ease-in-out infinite; }
 .rise-pop { animation: rise-pop 0.45s ease-out; }
 
+/* 히어로 배경 그라데이션 — 아주 천천히 회전 */
+@keyframes slow-spin {
+  to { transform: rotate(360deg); }
+}
+.animate-slow-spin { animation: slow-spin 40s linear infinite; }
+
+/* 복사 완료 토스트 — 2초 동안 떴다가 사라짐 */
+@keyframes toast-in-out {
+  0% { opacity: 0; transform: translateY(8px); }
+  12% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(8px); }
+}
+.animate-toast { animation: toast-in-out 2s ease-in-out forwards; }
+
 /* 모션 최소화를 원하는 사용자는 애니메이션을 끈다 */
 @media (prefers-reduced-motion: reduce) {
-  .rise-float, .rise-wiggle, .rise-blink, .rise-pop { animation: none; }
+  .rise-float, .rise-wiggle, .rise-blink, .rise-pop, .animate-slow-spin { animation: none; }
 }
 
 body {
