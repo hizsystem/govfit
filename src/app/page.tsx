@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   CATEGORIES,
   INDUSTRIES,
@@ -85,7 +85,7 @@ export default function Home() {
   // 화면 전환: 검색 / 전체공고 / 관심공고 / 공고 사이트 모음 / 뉴스레터 / 마이페이지 / 소개
   const [view, setView] = useState<
     "search" | "browse" | "saved" | "sites" | "newsletter" | "mypage" | "intro"
-  >("search");
+  >("intro");
   // 관심공고 화면 진입 시 초기 보기 모드 (마이페이지 타일에서 캘린더/목록 지정)
   const [savedMode, setSavedMode] = useState<"calendar" | "list">("calendar");
   // 연동된 지원사업 총 개수/소스 수 (소개·헤더에 표시)
@@ -288,7 +288,7 @@ export default function Home() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
+              src="/brand-logo.svg"
               alt="Brand Rise 로고"
               className="h-9 w-9 rounded-lg object-cover"
             />
@@ -304,7 +304,7 @@ export default function Home() {
               }
               className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "newsletter"
-                  ? "bg-blue-600 text-white"
+                  ? "border border-blue-600 bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
               }`}
             >
@@ -315,7 +315,7 @@ export default function Home() {
               onClick={() => setView((v) => (v === "sites" ? "search" : "sites"))}
               className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "sites"
-                  ? "bg-blue-600 text-white"
+                  ? "border border-blue-600 bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
               }`}
             >
@@ -326,7 +326,7 @@ export default function Home() {
               onClick={() => openSaved("calendar")}
               className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "saved"
-                  ? "bg-blue-600 text-white"
+                  ? "border border-blue-600 bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
               }`}
             >
@@ -337,7 +337,7 @@ export default function Home() {
               onClick={() => setView((v) => (v === "mypage" ? "search" : "mypage"))}
               className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "mypage"
-                  ? "bg-blue-600 text-white"
+                  ? "border border-blue-600 bg-blue-600 text-white"
                   : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
               }`}
             >
@@ -475,7 +475,7 @@ export default function Home() {
         onSubmit={handleSubmit}
         className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8 dark:border-gray-800 dark:bg-gray-900"
       >
-        <Field label="창업 단계 *">
+        <FieldSet label="창업 단계 *">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"
@@ -506,7 +506,7 @@ export default function Home() {
               </span>
             </button>
           </div>
-        </Field>
+        </FieldSet>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="회사명 (선택)">
@@ -577,7 +577,7 @@ export default function Home() {
                 />
               </Field>
 
-              <Field label="연매출">
+              <FieldSet label="연매출">
                 <div className="space-y-3">
                   <label className="flex items-center gap-3">
                     <input
@@ -612,7 +612,7 @@ export default function Home() {
                     />
                   )}
                 </div>
-              </Field>
+              </FieldSet>
             </>
           )}
         </div>
@@ -625,15 +625,15 @@ export default function Home() {
           </p>
         )}
 
-        <Field label="회사 특성 (해당되는 것 모두)">
+        <FieldSet label="회사 특성 (해당되는 것 모두)">
           <ChipGroup
             options={[...TRAITS]}
             selected={profile.traits}
             onToggle={(v) => toggleArray("traits", v)}
           />
-        </Field>
+        </FieldSet>
 
-        <Field label="관심 지원 분야 (해당되는 것 모두 · AI가 적합도 판단에 활용)">
+        <FieldSet label="관심 지원 분야 (해당되는 것 모두 · AI가 적합도 판단에 활용)">
           <ChipGroup
             options={CATEGORIES}
             selected={profile.interests}
@@ -644,7 +644,7 @@ export default function Home() {
             잘 맞는 좋은 사업이 있을 수 있어, 놓치지 않도록 조건에 맞는 공고는 모두
             보여드립니다.
           </p>
-        </Field>
+        </FieldSet>
 
         <Field
           label={
@@ -872,10 +872,10 @@ function RiseMascot({ className = "" }: { className?: string }) {
       </g>
 
       {/* 돋보기 */}
-      <line x1="46" y1="120" x2="30" y2="138" stroke="#8b7fd6" strokeWidth="8" strokeLinecap="round" />
-      <circle cx="60" cy="104" r="21" fill="#bfe3f5" opacity="0.22" />
-      <circle cx="60" cy="104" r="21" fill="none" stroke="#8b7fd6" strokeWidth="6" />
-      <circle cx="60" cy="104" r="21" fill="none" stroke="#cdc4f4" strokeWidth="2" />
+      <line x1="46" y1="120" x2="30" y2="138" stroke="#e07e0e" strokeWidth="8" strokeLinecap="round" />
+      <circle cx="60" cy="104" r="21" fill="#fde3c4" opacity="0.30" />
+      <circle cx="60" cy="104" r="21" fill="none" stroke="#e07e0e" strokeWidth="6" />
+      <circle cx="60" cy="104" r="21" fill="none" stroke="#fbc77a" strokeWidth="2" />
 
       {/* 왼손 (손잡이 잡음) */}
       <circle cx="30" cy="138" r="9" fill="url(#riseBody)" />
@@ -1537,7 +1537,7 @@ function LoginModal({
         <div className="text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/brand-logo.svg"
             alt="Brand Rise"
             className="mx-auto mb-3 h-12 w-12 rounded-xl object-cover"
           />
@@ -1626,52 +1626,59 @@ function LoginGate({
 
 const INTRO_FEATURES = [
   {
-    icon: "🎯",
+    img: "/features/feat-match.jpg",
     title: "맞춤 적합도 매칭",
-    desc: "업종·지역·업력·관심분야를 반영해 조건에 맞는 지원사업을 골라 적합도 점수로 정렬해드려요.",
+    desc: "업종·지역·업력·분야를 분석해\n우리 기업에 맞는 지원사업을\n추천해 드려요.",
   },
   {
-    icon: "🔄",
+    img: "/features/feat-collect.jpg",
     title: "실시간 공고 수집",
-    desc: "기업마당·K-Startup·글로벌aT·판판대로·서울경제진흥원 등 공공 데이터를 자동으로 모아 중복 없이 보여줘요.",
+    desc: "여러 기관의 공고를 자동 수집해\n중복 없이 한곳에서\n확인할 수 있어요.",
   },
   {
-    icon: "📅",
+    img: "/features/feat-calendar.jpg",
     title: "관심공고 & 마감 캘린더",
-    desc: "마음에 드는 공고를 담아두고, 신청 마감일을 월간 캘린더로 한눈에 관리하세요.",
+    desc: "관심 공고를 저장하고\n신청 마감일을 캘린더로\n관리하세요.",
   },
   {
-    icon: "📝",
+    img: "/features/feat-proposal.jpg",
     title: "사업계획서 초안",
-    desc: "공고와 회사 정보를 바탕으로 사업계획서 초안을 자동으로 만들어 신청 준비를 도와요.",
+    desc: "회사 정보와 공고를 바탕으로\n사업계획서 초안을\n자동 생성해 드려요.",
   },
   {
-    icon: "💳",
+    img: "/features/feat-card.jpg",
     title: "디지털 명함",
-    desc: "마이페이지에서 나만의 디지털 명함을 만들어 연락처 저장·공유까지 한 번에.",
+    desc: "나만의 디지털 명함을 만들고\n연락처 공유까지\n간편하게 하세요.",
   },
   {
-    icon: "📰",
+    img: "/features/feat-newsletter.jpg",
     title: "뉴스레터",
-    desc: "분야별 주요 공고를 모아 보기 쉽게 정리해드려요.",
+    desc: "분야별 주요 공고를 모아\n핵심 정보만 정리해\n전달해 드려요.",
   },
 ] as const;
 
 const INTRO_STEPS = [
   {
     no: "01",
+    icon: "📝",
     title: "회사 정보 입력",
     desc: "업종·지역·업력 등 기본 정보와 관심 분야를 입력해요. 예비창업자도 OK.",
+    // 라디얼 글로우/라벨 색 (R,G,B) — 따뜻한 톤으로 단계별 진행감
+    glow: "248,175,30", // 골드
   },
   {
     no: "02",
+    icon: "🎯",
     title: "적합도 추천 받기",
     desc: "조건에 맞는 지원사업을 골라 적합도 점수와 추천 이유까지 보여드려요.",
+    glow: "247,148,30", // 브랜드 주황
   },
   {
     no: "03",
+    icon: "🚀",
     title: "담고 · 관리하고 · 신청",
     desc: "관심공고를 담아 마감 캘린더로 챙기고, 사업계획서 초안으로 신청을 준비하세요.",
+    glow: "238,84,31", // 코랄
   },
 ] as const;
 
@@ -1689,14 +1696,14 @@ function IntroView({
   return (
     <div className="space-y-14 pb-10">
       {/* 히어로 */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 px-6 py-14 text-center text-white shadow-xl sm:px-10 sm:py-20">
+      <section className="full-bleed relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 py-16 text-center text-white shadow-xl sm:py-24">
         <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-violet-300/20 blur-3xl" />
 
-        <div className="relative">
+        <div className="relative mx-auto max-w-3xl px-6 sm:px-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/brand-logo.svg"
             alt="Brand Rise 로고"
             className="mx-auto mb-5 h-16 w-16 rounded-2xl object-cover shadow-lg"
           />
@@ -1704,9 +1711,9 @@ function IntroView({
             정부지원사업 매칭 플랫폼
           </span>
           <h1 className="mt-4 text-3xl font-extrabold leading-tight sm:text-5xl">
-            흩어진 정부지원사업,
+            <span className="text-blue-100">흩어진 정부지원사업,</span>
             <br />
-            <span className="text-blue-100">내게 맞는 것만 한 곳에서</span>
+            내게 맞는 것만 한 곳에서
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
             수많은 공공기관에 흩어진 지원사업 공고를 실시간으로 모아, 우리 회사
@@ -1789,45 +1796,93 @@ function IntroView({
             찾기부터 관리·신청 준비까지, 한 곳에서 끝내세요.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {INTRO_FEATURES.map((f) => (
             <div
               key={f.title}
-              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+              className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="text-3xl">{f.icon}</div>
-              <h3 className="mt-3 text-base font-bold text-gray-900 dark:text-gray-100">
-                {f.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                {f.desc}
-              </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={f.img}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              {/* 흰 글자 가독성을 위한 옅은 스크림 (일러스트는 톤온톤이라 은은) */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/12 to-transparent" />
+              <div className="relative flex h-full flex-col p-6">
+                <h3 className="text-lg font-bold text-white drop-shadow-sm">
+                  {f.title}
+                </h3>
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-white/90 drop-shadow-sm">
+                  {f.desc}
+                </p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 이용 방법 */}
-      <section className="rounded-3xl bg-gray-50 px-6 py-12 dark:bg-gray-800/40 sm:px-10">
-        <div className="mb-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
-            3단계면 충분해요
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {INTRO_STEPS.map((s) => (
-            <div key={s.no} className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-extrabold text-white">
-                {s.no}
-              </div>
-              <h3 className="mt-4 text-base font-bold text-gray-900 dark:text-gray-100">
-                {s.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                {s.desc}
-              </p>
-            </div>
-          ))}
+      {/* 이용 방법 — 가로 꽉 채우는 프로세스 흐름 */}
+      <section className="full-bleed bg-gradient-to-b from-blue-50/70 via-white to-white py-14 sm:py-20 dark:from-blue-950/20 dark:via-gray-950 dark:to-gray-950">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="text-center">
+            <span className="text-xs font-bold tracking-[0.2em] text-blue-600 dark:text-blue-400">
+              HOW IT WORKS
+            </span>
+            <h2 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
+              3단계면 충분해요
+            </h2>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              정보 입력부터 신청 준비까지, 이 흐름으로 진행돼요.
+            </p>
+          </div>
+
+          <ol className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center lg:gap-0">
+            {INTRO_STEPS.map((s, i) => (
+              <Fragment key={s.no}>
+                {i > 0 && (
+                  <li
+                    aria-hidden
+                    className="flex justify-center lg:mt-[5.5rem] lg:flex-1 lg:items-center"
+                  >
+                    <span className="text-2xl leading-none text-gray-300 lg:hidden dark:text-gray-700">
+                      ↓
+                    </span>
+                    <span className="hidden w-full items-center gap-1 lg:flex">
+                      <span className="h-0 flex-1 border-t-2 border-dotted border-gray-300 dark:border-gray-700" />
+                      <span className="text-base leading-none text-gray-300 dark:text-gray-700">
+                        ▸
+                      </span>
+                    </span>
+                  </li>
+                )}
+                <li className="flex flex-col items-center text-center lg:w-64 lg:flex-none">
+                  <div
+                    className="grid h-44 w-44 place-items-center rounded-full"
+                    style={{
+                      background: `radial-gradient(circle at center, rgba(${s.glow},0.5) 0%, rgba(${s.glow},0.14) 48%, rgba(${s.glow},0) 75%)`,
+                    }}
+                  >
+                    <span className="text-5xl drop-shadow-sm">{s.icon}</span>
+                  </div>
+                  <span
+                    className="mt-5 text-xs font-bold tracking-[0.2em]"
+                    style={{ color: `rgb(${s.glow})` }}
+                  >
+                    STEP {s.no}
+                  </span>
+                  <h3 className="mt-1.5 text-lg font-bold text-gray-900 dark:text-gray-100">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 max-w-[18rem] text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                    {s.desc}
+                  </p>
+                </li>
+              </Fragment>
+            ))}
+          </ol>
         </div>
       </section>
 
@@ -1862,7 +1917,7 @@ function IntroView({
         <div className="flex items-center justify-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/brand-logo.svg"
             alt="Brand Rise"
             className="h-6 w-6 rounded-md object-cover"
           />
@@ -3300,6 +3355,29 @@ function Field({
       </span>
       {children}
     </label>
+  );
+}
+
+/**
+ * 여러 개의 버튼·칩·라디오를 묶는 섹션 라벨.
+ * Field와 달리 <label>이 아니라 <div role="group">을 쓴다.
+ * (<label>로 감싸면 그 안의 첫 번째 버튼이 라벨과 묶여, 섹션 영역에
+ *  마우스를 대거나 클릭하기만 해도 첫 토글이 hover·선택되는 버그가 생긴다.)
+ */
+function FieldSet({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div role="group" aria-label={label}>
+      <span className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </span>
+      {children}
+    </div>
   );
 }
 
