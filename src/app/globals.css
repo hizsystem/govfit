@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f6fb;
-  --foreground: #0f172a;
+  /* 따뜻한 오프화이트 배경 / 웜한 본문색 */
+  --background: #faf7f2;
+  --foreground: #1c1917;
 }
 
 @theme inline {
@@ -12,16 +13,107 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ───────────────────────────────────────────────────────────────
+   Brand Rise 컬러 시스템 (따뜻한 리브랜딩)
+
+   ▸ 하이라이트(주황)를 바꾸고 싶으면 아래 `blue` 램프의 600 값만 고치세요.
+     코드 전반은 blue/indigo/violet/gray 클래스를 쓰고 있어서,
+     이 한 곳에서 색을 재정의하면 사이트 전체가 함께 바뀝니다.
+
+   blue   → 브랜드 주황(하이라이트, 버튼·강조)
+   indigo → 약간 노란 골드(주황 인접색, 그라데이션 파트너)
+   violet → 따뜻한 코랄(히어로 그라데이션 마무리색)
+   gray   → 웜그레이(stone) — 전체 중립색을 따뜻하게
+   ─────────────────────────────────────────────────────────────── */
+@theme {
+  /* 하이라이트 = 브랜드 주황 (로고 심볼 색) */
+  --color-blue-50:  #fff6ec;
+  --color-blue-100: #ffe9d2;
+  --color-blue-200: #ffd3a6;
+  --color-blue-300: #fdb773;
+  --color-blue-400: #fa9f44;
+  --color-blue-500: #fa9f2c;
+  --color-blue-600: #f7941e; /* ← 브랜드 하이라이트 (여기를 바꾸면 전체 변경) */
+  --color-blue-700: #e07e0e;
+  --color-blue-800: #b26211;
+  --color-blue-900: #8e4f13;
+  --color-blue-950: #4c2706;
+
+  /* 그라데이션 파트너 = 주황보다 살짝 노란 골드 */
+  --color-indigo-50:  #fff8e8;
+  --color-indigo-100: #fdefc4;
+  --color-indigo-200: #fbdd88;
+  --color-indigo-300: #f8c84b;
+  --color-indigo-400: #f6b524;
+  --color-indigo-500: #f7a915;
+  --color-indigo-600: #f8af1e; /* 그라데이션 to- (주황 옆 골드) */
+  --color-indigo-700: #d6850a;
+  --color-indigo-800: #b0700f;
+  --color-indigo-900: #8d5912;
+  --color-indigo-950: #4b2d06;
+
+  /* 히어로 마무리색 = 따뜻한 코랄 */
+  --color-violet-50:  #fff3ee;
+  --color-violet-100: #ffe2d6;
+  --color-violet-200: #ffc3ac;
+  --color-violet-300: #fca98a;
+  --color-violet-400: #f4855b;
+  --color-violet-500: #ee6c3a;
+  --color-violet-600: #e2541f;
+  --color-violet-700: #bc4116;
+  --color-violet-800: #963518;
+  --color-violet-900: #792f18;
+  --color-violet-950: #41140a;
+
+  /* 중립색 = 웜그레이(stone) — 사이트 전반을 따뜻하게 */
+  --color-gray-50:  #fafaf9;
+  --color-gray-100: #f5f5f4;
+  --color-gray-200: #e7e5e4;
+  --color-gray-300: #d6d3d1;
+  --color-gray-400: #a8a29e;
+  --color-gray-500: #78716c;
+  --color-gray-600: #57534e;
+  --color-gray-700: #44403c;
+  --color-gray-800: #292524;
+  --color-gray-900: #1c1917;
+  --color-gray-950: #0c0a09;
+
+  /* slate(소량 사용)도 웜그레이로 통일 */
+  --color-slate-50:  #fafaf9;
+  --color-slate-100: #f5f5f4;
+  --color-slate-200: #e7e5e4;
+  --color-slate-300: #d6d3d1;
+  --color-slate-400: #a8a29e;
+  --color-slate-500: #78716c;
+  --color-slate-600: #57534e;
+  --color-slate-700: #44403c;
+  --color-slate-800: #292524;
+  --color-slate-900: #1c1917;
+  --color-slate-950: #0c0a09;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1a1714;
+    --foreground: #f5f0e8;
   }
 }
 
 html {
   /* 16px → 18px : 전체 글씨·간격을 비율대로 키움 */
   font-size: 112.5%;
+  /* 스크롤바 자리를 항상 예약 — 화면을 바꿔 스크롤바가 생겨도
+     가운데 정렬된 네비/본문이 좌우로 밀리지 않게 한다. */
+  scrollbar-gutter: stable;
+}
+
+/* 가로를 꽉 채우는 배경 띠(full-bleed) — max-width 컨테이너 안에서도
+   양옆 끝까지 펼쳐진다. overflow-x: clip(아래 body)이 스크롤바 폭만큼의
+   미세한 넘침을 잘라줘 가로 스크롤이 생기지 않는다. */
+.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 /* ── 로딩 마스코트(라이지) 애니메이션 ───────────────────────────── */
@@ -46,9 +138,24 @@ html {
 .rise-blink { animation: rise-blink 4.2s ease-in-out infinite; }
 .rise-pop { animation: rise-pop 0.45s ease-out; }
 
+/* 히어로 배경 그라데이션 — 아주 천천히 회전 */
+@keyframes slow-spin {
+  to { transform: rotate(360deg); }
+}
+.animate-slow-spin { animation: slow-spin 40s linear infinite; }
+
+/* 복사 완료 토스트 — 2초 동안 떴다가 사라짐 */
+@keyframes toast-in-out {
+  0% { opacity: 0; transform: translateY(8px); }
+  12% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(8px); }
+}
+.animate-toast { animation: toast-in-out 2s ease-in-out forwards; }
+
 /* 모션 최소화를 원하는 사용자는 애니메이션을 끈다 */
 @media (prefers-reduced-motion: reduce) {
-  .rise-float, .rise-wiggle, .rise-blink, .rise-pop { animation: none; }
+  .rise-float, .rise-wiggle, .rise-blink, .rise-pop, .animate-slow-spin { animation: none; }
 }
 
 body {
@@ -56,4 +163,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), -apple-system, "Apple SD Gothic Neo",
     "Malgun Gothic", "맑은 고딕", sans-serif;
+  /* full-bleed 요소가 스크롤바 폭만큼 넘치는 것을 잘라낸다.
+     (clip은 hidden과 달리 sticky 네비를 깨지 않는다) */
+  overflow-x: clip;
 }
