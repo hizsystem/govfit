@@ -18,7 +18,8 @@ import { BrowseView } from "@/components/BrowseView";
 import { buildProposal, type ProposalFormat } from "@/lib/proposal";
 import { buildNewsletter, type CategoryGroup } from "@/lib/newsletter";
 import { track, getSessionId } from "@/lib/track";
-import { useAuth, displayUserName, type OAuthProvider } from "@/lib/auth";
+import { useAuth, displayUserName } from "@/lib/auth";
+import { LoginModal } from "@/components/LoginModal";
 
 const EMPTY_PROFILE: CompanyProfile = {
   name: "",
@@ -299,30 +300,6 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-end gap-1 md:gap-1.5">
             <button
               type="button"
-              onClick={() =>
-                setView((v) => (v === "newsletter" ? "search" : "newsletter"))
-              }
-              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
-                view === "newsletter"
-                  ? "bg-blue-600 text-white"
-                  : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-              }`}
-            >
-              📰 뉴스레터 구독
-            </button>
-            <button
-              type="button"
-              onClick={() => setView((v) => (v === "sites" ? "search" : "sites"))}
-              className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
-                view === "sites"
-                  ? "bg-blue-600 text-white"
-                  : "border border-gray-300 bg-white text-gray-700 hover:border-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-              }`}
-            >
-              🔗 공고 사이트 모음
-            </button>
-            <button
-              type="button"
               onClick={() => openSaved("calendar")}
               className={`shrink-0 rounded-xl px-1.5 py-1.5 text-xs font-semibold transition sm:px-2.5 sm:py-2 sm:text-sm ${
                 view === "saved"
@@ -371,10 +348,7 @@ export default function Home() {
       </nav>
 
       {showLogin && (
-        <LoginModal
-          onClose={() => setShowLogin(false)}
-          onSignIn={(p) => auth.signIn(p)}
-        />
+        <LoginModal auth={auth} onClose={() => setShowLogin(false)} />
       )}
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
@@ -415,7 +389,6 @@ export default function Home() {
           stats={stats}
           onStart={() => setView("search")}
           onOpenMypage={() => setView("mypage")}
-          onOpenNewsletter={() => setView("newsletter")}
         />
       ) : view === "mypage" ? (
         <MyPageView
@@ -1513,78 +1486,6 @@ function SitesView() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// 로그인 / 회원가입 (카카오·구글 소셜)
-// ---------------------------------------------------------------------------
-
-/** 로그인 모달 — 카카오/구글 소셜 로그인 (첫 로그인이 곧 회원가입) */
-function LoginModal({
-  onClose,
-  onSignIn,
-}: {
-  onClose: () => void;
-  onSignIn: (provider: OAuthProvider) => void;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo.png"
-            alt="Brand Rise"
-            className="mx-auto mb-3 h-12 w-12 rounded-xl object-cover"
-          />
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-            로그인 / 회원가입
-          </h3>
-          <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-            소셜 계정으로 3초 만에 시작하세요.
-            <br />
-            관심공고·마이페이지가 기기를 바꿔도 유지돼요.
-          </p>
-        </div>
-
-        <div className="mt-6 space-y-2.5">
-          <button
-            type="button"
-            onClick={() => onSignIn("kakao")}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-3 text-sm font-bold text-[#191600] transition hover:brightness-95"
-          >
-            <span aria-hidden>💬</span> 카카오로 시작하기
-          </button>
-          <button
-            type="button"
-            onClick={() => onSignIn("google")}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-3 text-sm font-bold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-          >
-            <span aria-hidden>🔵</span> 구글로 시작하기
-          </button>
-        </div>
-
-        <p className="mt-4 text-center text-[11px] leading-relaxed text-gray-400">
-          최초 로그인 시 자동으로 회원가입됩니다. 로그인하면 서비스 이용약관 및
-          개인정보 처리방침에 동의하는 것으로 간주됩니다.
-        </p>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-3 w-full rounded-xl py-2 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
-          닫기
-        </button>
-      </div>
-    </div>
-  );
-}
-
 /** 로그인 필수 기능 진입 시 보여주는 안내 게이트 */
 function LoginGate({
   feature,
@@ -1650,11 +1551,6 @@ const INTRO_FEATURES = [
     title: "디지털 명함",
     desc: "마이페이지에서 나만의 디지털 명함을 만들어 연락처 저장·공유까지 한 번에.",
   },
-  {
-    icon: "📰",
-    title: "뉴스레터",
-    desc: "분야별 주요 공고를 모아 보기 쉽게 정리해드려요.",
-  },
 ] as const;
 
 const INTRO_STEPS = [
@@ -1679,12 +1575,10 @@ function IntroView({
   stats,
   onStart,
   onOpenMypage,
-  onOpenNewsletter,
 }: {
   stats: { total: number; cumulative: number; sourceCount: number } | null;
   onStart: () => void;
   onOpenMypage: () => void;
-  onOpenNewsletter: () => void;
 }) {
   return (
     <div className="space-y-14 pb-10">
@@ -1846,13 +1740,6 @@ function IntroView({
             className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50"
           >
             🔍 지금 추천받기
-          </button>
-          <button
-            type="button"
-            onClick={onOpenNewsletter}
-            className="rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
-          >
-            📰 뉴스레터 보기
           </button>
         </div>
       </section>
