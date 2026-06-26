@@ -1,5 +1,5 @@
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Brand Rise">
-  <rect width="512" height="512" rx="96" fill="#F7941E"/>
+  <rect width="512" height="512" rx="96" fill="#4196EC"/>
   <circle cx="512" cy="512" r="150" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="26"/>
   <text x="256" y="262" text-anchor="middle" dominant-baseline="central"
         font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"

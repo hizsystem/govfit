@@ -1077,10 +1077,10 @@ function RiseMascot({ className = "" }: { className?: string }) {
       </g>
 
       {/* 돋보기 */}
-      <line x1="46" y1="120" x2="30" y2="138" stroke="#e07e0e" strokeWidth="8" strokeLinecap="round" />
-      <circle cx="60" cy="104" r="21" fill="#fde3c4" opacity="0.30" />
-      <circle cx="60" cy="104" r="21" fill="none" stroke="#e07e0e" strokeWidth="6" />
-      <circle cx="60" cy="104" r="21" fill="none" stroke="#fbc77a" strokeWidth="2" />
+      <line x1="46" y1="120" x2="30" y2="138" stroke="#2f82d6" strokeWidth="8" strokeLinecap="round" />
+      <circle cx="60" cy="104" r="21" fill="#d5e8fc" opacity="0.35" />
+      <circle cx="60" cy="104" r="21" fill="none" stroke="#2f82d6" strokeWidth="6" />
+      <circle cx="60" cy="104" r="21" fill="none" stroke="#82baf3" strokeWidth="2" />
 
       {/* 왼손 (손잡이 잡음) */}
       <circle cx="30" cy="138" r="9" fill="url(#riseBody)" />
@@ -1997,29 +1997,31 @@ function IntroView({
 }) {
   return (
     <div>
-      {/* 히어로 */}
-      <section className="full-bleed relative -mt-8 overflow-hidden bg-blue-600 py-16 text-center text-white sm:py-24">
-        {/* 아주 천천히 회전하는 배경 그라데이션 (200% 크기라 회전해도 빈 곳이 없음) */}
-        <div className="animate-slow-spin pointer-events-none absolute inset-[-50%] bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600" />
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-violet-300/20 blur-3xl" />
+      {/* 히어로 — 연한 블루↔화이트 그라데이션이 배경에 은은하게 깔리고 천천히 회전 */}
+      <section className="full-bleed relative -mt-8 overflow-hidden bg-white py-16 text-center sm:py-24 dark:bg-gray-950">
+        {/* 아주 연한 블루↔화이트 그라데이션 (200% 크기라 회전해도 빈 곳이 없음) */}
+        <div className="animate-slow-spin pointer-events-none absolute inset-[-50%] bg-gradient-to-br from-blue-100 via-white to-blue-50 dark:from-blue-950/40 dark:via-gray-950 dark:to-gray-900" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-blue-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-blue-100/60 blur-3xl" />
 
         <div className="relative mx-auto max-w-3xl px-6 sm:px-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand-logo.svg"
             alt="Brand Rise 로고"
-            className="mx-auto mb-5 h-16 w-16 rounded-2xl object-cover shadow-lg"
+            className="mx-auto mb-5 h-16 w-16 rounded-2xl object-cover shadow-md"
           />
-          <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide">
+          <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold tracking-wide text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
             정부지원사업 매칭 플랫폼
           </span>
-          <h1 className="mt-4 text-3xl font-extrabold leading-tight sm:text-5xl">
-            <span className="text-blue-100">흩어진 정부지원사업,</span>
+          <h1 className="mt-4 text-3xl font-extrabold leading-tight text-gray-900 sm:text-5xl dark:text-gray-100">
+            <span className="text-blue-600 dark:text-blue-400">
+              흩어진 정부지원사업,
+            </span>
             <br />
             내게 맞는 것만 한 곳에서
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
+          <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-300">
             우리 회사 조건에 맞는 정부 지원 사업 공고만 골라
             <br />
             적합도 순으로 추천해드립니다.
@@ -2028,19 +2030,21 @@ function IntroView({
             <button
               type="button"
               onClick={onStart}
-              className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50 sm:text-base"
+              className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 sm:text-base"
             >
               🔍 내게 맞는 지원사업 찾기
             </button>
           </div>
           {stats && (stats.cumulative > 0 || stats.total > 0) && (
-            <p className="mt-6 text-sm text-blue-100">
+            <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
               📚 누적{" "}
-              <b className="text-white">
+              <b className="text-gray-900 dark:text-gray-100">
                 {(stats.cumulative || stats.total).toLocaleString()}건
               </b>{" "}
               · 📡 지금 신청 가능{" "}
-              <b className="text-white">{stats.total.toLocaleString()}건</b>
+              <b className="text-gray-900 dark:text-gray-100">
+                {stats.total.toLocaleString()}건
+              </b>
             </p>
           )}
         </div>

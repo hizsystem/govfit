@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  /* 따뜻한 오프화이트 배경 / 웜한 본문색 */
-  --background: #faf7f2;
-  --foreground: #1c1917;
+  /* 하이라이트(블루)를 아주 옅게 한 배경 / 쿨한 본문색 */
+  --background: #f1f6fd;
+  --foreground: #111827;
 }
 
 @theme inline {
@@ -14,88 +14,88 @@
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Brand Rise 컬러 시스템 (따뜻한 리브랜딩)
+   Brand Rise 컬러 시스템 (블루 #4196EC · 화이트 · 블랙 위주)
 
-   ▸ 하이라이트(주황)를 바꾸고 싶으면 아래 `blue` 램프의 600 값만 고치세요.
+   ▸ 하이라이트를 바꾸고 싶으면 아래 `blue` 램프의 600 값만 고치세요.
      코드 전반은 blue/indigo/violet/gray 클래스를 쓰고 있어서,
      이 한 곳에서 색을 재정의하면 사이트 전체가 함께 바뀝니다.
 
-   blue   → 브랜드 주황(하이라이트, 버튼·강조)
-   indigo → 약간 노란 골드(주황 인접색, 그라데이션 파트너)
-   violet → 따뜻한 코랄(히어로 그라데이션 마무리색)
-   gray   → 웜그레이(stone) — 전체 중립색을 따뜻하게
+   blue   → 하이라이트 블루(#4196EC, 버튼·강조)
+   indigo → 그라데이션 파트너(살짝 깊은 블루)
+   violet → 보조 블루
+   gray   → 쿨 뉴트럴 그레이(블랙↔화이트)
    ─────────────────────────────────────────────────────────────── */
 @theme {
-  /* 하이라이트 = 브랜드 주황 (로고 심볼 색) */
-  --color-blue-50:  #fff6ec;
-  --color-blue-100: #ffe9d2;
-  --color-blue-200: #ffd3a6;
-  --color-blue-300: #fdb773;
-  --color-blue-400: #fa9f44;
-  --color-blue-500: #fa9f2c;
-  --color-blue-600: #f7941e; /* ← 브랜드 하이라이트 (여기를 바꾸면 전체 변경) */
-  --color-blue-700: #e07e0e;
-  --color-blue-800: #b26211;
-  --color-blue-900: #8e4f13;
-  --color-blue-950: #4c2706;
+  /* 하이라이트 = 브랜드 블루 (#4196EC) */
+  --color-blue-50:  #eef5fe;
+  --color-blue-100: #d5e8fc;
+  --color-blue-200: #b3d5f9;
+  --color-blue-300: #82baf3;
+  --color-blue-400: #5aa4ef;
+  --color-blue-500: #4d9dee;
+  --color-blue-600: #4196ec; /* ← 브랜드 하이라이트 (여기를 바꾸면 전체 변경) */
+  --color-blue-700: #2f82d6;
+  --color-blue-800: #2769ac;
+  --color-blue-900: #24588b;
+  --color-blue-950: #173455;
 
-  /* 그라데이션 파트너 = 주황보다 살짝 노란 골드 */
-  --color-indigo-50:  #fff8e8;
-  --color-indigo-100: #fdefc4;
-  --color-indigo-200: #fbdd88;
-  --color-indigo-300: #f8c84b;
-  --color-indigo-400: #f6b524;
-  --color-indigo-500: #f7a915;
-  --color-indigo-600: #f8af1e; /* 그라데이션 to- (주황 옆 골드) */
-  --color-indigo-700: #d6850a;
-  --color-indigo-800: #b0700f;
-  --color-indigo-900: #8d5912;
-  --color-indigo-950: #4b2d06;
+  /* 그라데이션 파트너 = 살짝 깊은 블루 */
+  --color-indigo-50:  #ecf3fe;
+  --color-indigo-100: #d3e3fc;
+  --color-indigo-200: #aecbf8;
+  --color-indigo-300: #7ba9f1;
+  --color-indigo-400: #5285e7;
+  --color-indigo-500: #366adb;
+  --color-indigo-600: #2f63d3;
+  --color-indigo-700: #2851ab;
+  --color-indigo-800: #25458a;
+  --color-indigo-900: #233d70;
+  --color-indigo-950: #172548;
 
-  /* 히어로 마무리색 = 따뜻한 코랄 */
-  --color-violet-50:  #fff3ee;
-  --color-violet-100: #ffe2d6;
-  --color-violet-200: #ffc3ac;
-  --color-violet-300: #fca98a;
-  --color-violet-400: #f4855b;
-  --color-violet-500: #ee6c3a;
-  --color-violet-600: #e2541f;
-  --color-violet-700: #bc4116;
-  --color-violet-800: #963518;
-  --color-violet-900: #792f18;
-  --color-violet-950: #41140a;
+  /* 보조 블루 */
+  --color-violet-50:  #eef4fe;
+  --color-violet-100: #d8e6fc;
+  --color-violet-200: #bcd4f9;
+  --color-violet-300: #8fb6f3;
+  --color-violet-400: #6197ec;
+  --color-violet-500: #4196ec;
+  --color-violet-600: #357fdb;
+  --color-violet-700: #2c66b4;
+  --color-violet-800: #28548f;
+  --color-violet-900: #244873;
+  --color-violet-950: #172c48;
 
-  /* 중립색 = 웜그레이(stone) — 사이트 전반을 따뜻하게 */
-  --color-gray-50:  #fafaf9;
-  --color-gray-100: #f5f5f4;
-  --color-gray-200: #e7e5e4;
-  --color-gray-300: #d6d3d1;
-  --color-gray-400: #a8a29e;
-  --color-gray-500: #78716c;
-  --color-gray-600: #57534e;
-  --color-gray-700: #44403c;
-  --color-gray-800: #292524;
-  --color-gray-900: #1c1917;
-  --color-gray-950: #0c0a09;
+  /* 중립색 = 쿨 뉴트럴 그레이 */
+  --color-gray-50:  #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  --color-gray-950: #030712;
 
-  /* slate(소량 사용)도 웜그레이로 통일 */
-  --color-slate-50:  #fafaf9;
-  --color-slate-100: #f5f5f4;
-  --color-slate-200: #e7e5e4;
-  --color-slate-300: #d6d3d1;
-  --color-slate-400: #a8a29e;
-  --color-slate-500: #78716c;
-  --color-slate-600: #57534e;
-  --color-slate-700: #44403c;
-  --color-slate-800: #292524;
-  --color-slate-900: #1c1917;
-  --color-slate-950: #0c0a09;
+  /* slate(소량 사용)도 쿨 그레이로 통일 */
+  --color-slate-50:  #f9fafb;
+  --color-slate-100: #f3f4f6;
+  --color-slate-200: #e5e7eb;
+  --color-slate-300: #d1d5db;
+  --color-slate-400: #9ca3af;
+  --color-slate-500: #6b7280;
+  --color-slate-600: #4b5563;
+  --color-slate-700: #374151;
+  --color-slate-800: #1f2937;
+  --color-slate-900: #111827;
+  --color-slate-950: #030712;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1a1714;
-    --foreground: #f5f0e8;
+    --background: #0a1019;
+    --foreground: #e8eef6;
   }
 }
 

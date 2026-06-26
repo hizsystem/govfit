@@ -1,6 +1,6 @@
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Brand Rise">
-  <!-- Brand Rise 로고 심볼: 주황 배경 + 흰색 BR + 우하단 은은한 원 -->
-  <rect width="512" height="512" fill="#F7941E"/>
+  <!-- Brand Rise 로고 심볼: 블루 배경 + 흰색 BR + 우하단 은은한 원 -->
+  <rect width="512" height="512" fill="#4196EC"/>
   <circle cx="512" cy="512" r="150" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="26"/>
   <text x="256" y="262" text-anchor="middle" dominant-baseline="central"
         font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
