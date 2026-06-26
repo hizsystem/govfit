@@ -1896,10 +1896,10 @@ function FeatureCard({ f }: { f: (typeof INTRO_FEATURES)[number] }) {
         src={f.img}
         alt=""
         aria-hidden
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover saturate-[1.25]"
       />
-      {/* 흰 글자 가독성을 위한 옅은 스크림 (카드를 맑게 — 농도 낮춤) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/5 to-transparent" />
+      {/* 글자 가독성용 — 상단만 살짝 어둡게(나머지는 맑게 그대로) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/28 via-transparent to-transparent" />
       <div className="relative flex h-full flex-col p-6">
         <h3 className="text-lg font-bold text-white drop-shadow">{f.title}</h3>
         <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-white/95 drop-shadow">
@@ -2174,38 +2174,38 @@ function IntroView({
         </div>
       </section>
 
-      {/* 마무리 CTA — 가로 꽉 채우는 밝은 배경 */}
-      <section className="full-bleed bg-gradient-to-br from-blue-500 to-indigo-400 py-14 text-center text-white sm:py-20">
-        <div className="mx-auto max-w-3xl px-6 sm:px-10">
-          <h2 className="text-2xl font-bold sm:text-3xl">
+      {/* 마무리 CTA — 옅은 블루 라인 둥근 카드 */}
+      <section className="mt-14">
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/40 px-6 py-12 text-center sm:px-10 dark:border-blue-900/50 dark:bg-blue-950/20">
+          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
             우리 회사에 맞는 지원 사업,
             <br />
             지금 확인하세요
           </h2>
-          <p className="mt-2 text-sm text-white/90">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             회원가입 없이 바로 시작할 수 있어요.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={onStart}
-              className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-md transition hover:bg-blue-50"
+              className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
             >
-              🔍 지금 추천받기
+              지금 추천받기
             </button>
             <button
               type="button"
               onClick={onOpenNewsletter}
-              className="rounded-xl border border-white/50 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
+              className="rounded-xl border border-blue-600 px-6 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40"
             >
-              📰 뉴스레터 보기
+              뉴스레터 보기
             </button>
           </div>
         </div>
       </section>
 
       {/* 푸터 — 전폭 구분선 + 4단 그리드 (페이지 맨 바닥, main의 하단 패딩 상쇄) */}
-      <footer className="full-bleed -mb-8 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
+      <footer className="full-bleed -mb-8 mt-14 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
         <div className="mx-auto max-w-5xl px-6 py-9">
           <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
             {/* 1. 로고 + 상호명 */}
