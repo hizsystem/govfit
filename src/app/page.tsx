@@ -20,6 +20,13 @@ import { buildNewsletter, type CategoryGroup } from "@/lib/newsletter";
 import { track, getSessionId } from "@/lib/track";
 import { useAuth, displayUserName } from "@/lib/auth";
 import { LoginModal } from "@/components/LoginModal";
+import {
+  fetchBookmarks,
+  putBookmark,
+  removeBookmark,
+  fetchProfileData,
+  putProfileData,
+} from "@/lib/userData";
 
 const EMPTY_PROFILE: CompanyProfile = {
   name: "",
@@ -111,19 +118,58 @@ export default function Home() {
   const needsLogin =
     auth.configured && !auth.user && (view === "saved" || view === "mypage");
 
+  // 관심공고·프로필을 "계정"에 묶어 불러온다.
+  //  - 로그인: Supabase(계정별)에서 로드. 레거시 localStorage는 섞임 방지를 위해 정리.
+  //  - 비로그인 + Supabase 미설정(개발 등): localStorage 폴백.
+  //  - 비로그인 + Supabase 설정됨: 빈 상태(다른 계정 데이터가 안 보이게).
   useEffect(() => {
-    // localStorage는 클라이언트에만 있으므로 마운트 후 읽어 하이드레이션 불일치를 피한다.
-    // (이 setState는 그 목적상 의도된 것이라 set-state-in-effect 규칙을 끈다.)
-    try {
-      const raw = localStorage.getItem(BOOKMARK_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setBookmarks(JSON.parse(raw));
-      const rawProfile = localStorage.getItem(MYPROFILE_KEY);
-      if (rawProfile) setMyProfile({ ...EMPTY_MYPROFILE, ...JSON.parse(rawProfile) });
-    } catch {
-      /* 저장된 값이 깨졌으면 무시 */
+    if (!auth.ready) return; // 세션 확인이 끝난 뒤에 로드
+    let alive = true;
+
+    async function load() {
+      if (auth.user) {
+        // 이 브라우저에 남은 레거시 저장분은 계정과 무관하니 비운다(섞임 방지).
+        try {
+          localStorage.removeItem(BOOKMARK_KEY);
+          localStorage.removeItem(MYPROFILE_KEY);
+        } catch {
+          /* 무시 */
+        }
+        try {
+          const [bm, pf] = await Promise.all([
+            fetchBookmarks(auth.user.id),
+            fetchProfileData<MyProfile>(auth.user.id),
+          ]);
+          if (!alive) return;
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setBookmarks(bm);
+          setMyProfile(pf ? { ...EMPTY_MYPROFILE, ...pf } : EMPTY_MYPROFILE);
+        } catch {
+          /* 네트워크 오류 등은 무시(빈 상태 유지) */
+        }
+      } else if (!auth.configured) {
+        try {
+          const raw = localStorage.getItem(BOOKMARK_KEY);
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          if (raw && alive) setBookmarks(JSON.parse(raw));
+          const rawProfile = localStorage.getItem(MYPROFILE_KEY);
+          if (rawProfile && alive)
+            setMyProfile({ ...EMPTY_MYPROFILE, ...JSON.parse(rawProfile) });
+        } catch {
+          /* 무시 */
+        }
+      } else if (alive) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setBookmarks({});
+        setMyProfile(EMPTY_MYPROFILE);
+      }
     }
-  }, []);
+
+    load();
+    return () => {
+      alive = false;
+    };
+  }, [auth.ready, auth.user, auth.configured]);
 
   // 연동 지원사업 총 개수 로드 (캐시된 /api/stats — 실패해도 무시)
   useEffect(() => {
@@ -147,10 +193,17 @@ export default function Home() {
 
   function saveMyProfile(next: MyProfile) {
     setMyProfile(next);
-    try {
-      localStorage.setItem(MYPROFILE_KEY, JSON.stringify(next));
-    } catch {
-      /* 용량 초과 등은 무시 */
+    // 로그인 시 계정(Supabase)에 저장, 미설정(개발)이면 localStorage 폴백.
+    if (auth.user) {
+      putProfileData(auth.user.id, next).catch(() => {
+        /* 저장 실패는 무시(다음 저장에 재시도) */
+      });
+    } else {
+      try {
+        localStorage.setItem(MYPROFILE_KEY, JSON.stringify(next));
+      } catch {
+        /* 용량 초과 등은 무시 */
+      }
     }
   }
 
@@ -180,22 +233,33 @@ export default function Home() {
     };
   }, []);
 
-  function persist(next: Record<string, Recommendation>) {
-    setBookmarks(next);
-    try {
-      localStorage.setItem(BOOKMARK_KEY, JSON.stringify(next));
-    } catch {
-      /* 용량 초과 등은 무시 */
-    }
-  }
-
   function toggleBookmark(rec: Recommendation) {
+    // 관심공고는 회원 기능 — 비로그인(설정됨)이면 로그인 유도.
+    if (auth.configured && !auth.user) {
+      setShowLogin(true);
+      return;
+    }
     const id = rec.program.id;
+    const adding = !bookmarks[id];
     const next = { ...bookmarks };
-    const adding = !next[id];
-    if (next[id]) delete next[id];
-    else next[id] = rec;
-    persist(next);
+    if (adding) next[id] = rec;
+    else delete next[id];
+    setBookmarks(next);
+    // 저장: 로그인 시 계정(Supabase) 단건 반영, 미설정(개발)이면 localStorage.
+    if (auth.user) {
+      const op = adding
+        ? putBookmark(auth.user.id, id, rec)
+        : removeBookmark(auth.user.id, id);
+      op.catch(() => {
+        /* 저장 실패는 무시 */
+      });
+    } else {
+      try {
+        localStorage.setItem(BOOKMARK_KEY, JSON.stringify(next));
+      } catch {
+        /* 무시 */
+      }
+    }
     track("bookmark", {
       programId: id,
       programTitle: rec.program.title,
