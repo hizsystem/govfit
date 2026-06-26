@@ -1865,25 +1865,22 @@ const INTRO_FEATURES = [
 const INTRO_STEPS = [
   {
     no: "01",
-    icon: "📝",
     title: "회사 정보 입력",
     desc: "업종·지역·업력 등 기본 정보와 관심 분야를 입력해요. 예비창업자도 OK.",
-    // 라디얼 글로우/라벨 색 (R,G,B) — 따뜻한 톤으로 단계별 진행감
-    glow: "248,175,30", // 골드
+    // STEP 라벨·숫자·라인 색 (R,G,B) — 하이라이트 블루의 주변색(시안→블루→인디고)
+    accent: "52,181,224", // 시안
   },
   {
     no: "02",
-    icon: "🎯",
     title: "적합도 추천 받기",
     desc: "조건에 맞는 지원사업을 골라\n적합도 점수와 추천 이유까지 보여드려요.",
-    glow: "247,148,30", // 브랜드 주황
+    accent: "77,143,230", // 블루
   },
   {
     no: "03",
-    icon: "🚀",
     title: "담고 · 관리하고 · 신청",
     desc: "관심공고를 담아 마감 캘린더로 챙기고,\n사업계획서 초안으로 신청을 준비하세요.",
-    glow: "238,84,31", // 코랄
+    accent: "110,111,230", // 인디고
   },
 ] as const;
 
@@ -2117,18 +2114,18 @@ function IntroView({
             </p>
           </div>
 
-          <ol className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center lg:gap-0">
+          <ol className="mt-12 flex flex-col items-stretch gap-6 lg:flex-row lg:items-stretch lg:justify-center lg:gap-0">
             {INTRO_STEPS.map((s, i) => (
               <Fragment key={s.no}>
                 {i > 0 && (
                   <li
                     aria-hidden
-                    className="flex justify-center lg:mt-[5.5rem] lg:flex-1 lg:items-center"
+                    className="flex items-center justify-center lg:flex-1"
                   >
                     <span className="text-2xl leading-none text-gray-300 lg:hidden dark:text-gray-700">
                       ↓
                     </span>
-                    <span className="hidden w-full items-center gap-1 lg:flex">
+                    <span className="hidden w-full items-center gap-1 px-2 lg:flex">
                       <span className="h-0 flex-1 border-t-2 border-dotted border-gray-300 dark:border-gray-700" />
                       <span className="text-base leading-none text-gray-300 dark:text-gray-700">
                         ▸
@@ -2136,35 +2133,30 @@ function IntroView({
                     </span>
                   </li>
                 )}
-                <li className="flex flex-col items-center text-center lg:w-64 lg:flex-none">
-                  {/* STEP + 숫자 (그라데이션 원 안, 줄바꿈 / 숫자 강조) */}
-                  <div
-                    className="grid h-44 w-44 place-items-center rounded-full"
-                    style={{
-                      background: `radial-gradient(circle at center, rgba(${s.glow},0.5) 0%, rgba(${s.glow},0.14) 48%, rgba(${s.glow},0) 75%)`,
-                    }}
+                {/* 옅은 라인 둥근 카드 (라인·STEP 색은 하이라이트 블루의 주변색) */}
+                <li
+                  className="flex flex-col rounded-2xl border bg-white px-5 py-7 text-center dark:bg-gray-900 lg:w-64 lg:flex-none"
+                  style={{ borderColor: `rgba(${s.accent},0.4)` }}
+                >
+                  {/* STEP + 숫자 (줄바꿈 / 숫자 강조) */}
+                  <span
+                    className="flex flex-col items-center leading-none"
+                    style={{ color: `rgb(${s.accent})` }}
                   >
-                    <span
-                      className="flex flex-col items-center leading-none"
-                      style={{ color: `rgb(${s.glow})` }}
-                    >
-                      {/* pl로 letter-spacing 끝 여백을 보정해 가운데 정렬 */}
-                      <span className="pl-[0.35em] text-sm font-bold tracking-[0.35em]">
-                        STEP
-                      </span>
-                      <span className="mt-1.5 text-6xl font-extrabold tracking-tight">
-                        {s.no}
-                      </span>
+                    {/* pl로 letter-spacing 끝 여백을 보정해 가운데 정렬 */}
+                    <span className="pl-[0.35em] text-sm font-bold tracking-[0.35em]">
+                      STEP
                     </span>
-                  </div>
-                  {/* 아이콘 */}
-                  <span className="mt-5 text-3xl drop-shadow-sm">{s.icon}</span>
+                    <span className="mt-1.5 text-5xl font-extrabold tracking-tight">
+                      {s.no}
+                    </span>
+                  </span>
                   {/* 타이틀 */}
-                  <h3 className="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">
+                  <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-gray-100">
                     {s.title}
                   </h3>
                   {/* 내용 */}
-                  <p className="mt-2 max-w-[18rem] whitespace-pre-line text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                     {s.desc}
                   </p>
                 </li>
@@ -2176,7 +2168,7 @@ function IntroView({
 
       {/* 마무리 CTA — 옅은 블루 라인 둥근 카드 */}
       <section className="mt-14">
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/40 px-6 py-12 text-center sm:px-10 dark:border-blue-900/50 dark:bg-blue-950/20">
+        <div className="rounded-2xl bg-blue-50/40 px-6 py-12 text-center sm:px-10 dark:bg-blue-950/20">
           <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">
             우리 회사에 맞는 지원 사업,
             <br />
