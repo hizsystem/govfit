@@ -10,12 +10,14 @@ const SOCIALS: {
   icon: string;
   className: string;
 }[] = [
-  {
-    provider: "kakao",
-    label: "카카오로 계속하기",
-    icon: "💬",
-    className: "bg-[#FEE500] text-[#191600] hover:brightness-95",
-  },
+  // 카카오는 이메일(account_email) 받으려면 비즈앱 전환이 필요해 일단 보류.
+  // 비즈앱 전환 후 아래 주석을 풀면 버튼이 되살아난다.
+  // {
+  //   provider: "kakao",
+  //   label: "카카오로 계속하기",
+  //   icon: "💬",
+  //   className: "bg-[#FEE500] text-[#191600] hover:brightness-95",
+  // },
   // 네이버는 Supabase 커스텀 제공자(OIDC) 와 궁합이 안 맞아 보류.
   // 나중에 별도 연동하면 아래 주석을 풀어 버튼을 되살릴 수 있다.
   // {
