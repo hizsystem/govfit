@@ -128,7 +128,7 @@ export function LoginModal({
         <div className="text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/brand-logo.svg"
             alt="Brand Rise"
             className="mx-auto mb-3 h-12 w-12 rounded-xl object-cover"
           />
