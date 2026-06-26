@@ -3266,16 +3266,44 @@ function RecCard({
         </div>
       </div>
 
-      {/* 접힌 상태: 추천 이유 요약 + 펼치기 버튼 */}
+      {/* 접힌 상태: 핵심 정보(지역·수행기관·매칭 키워드)만 빠르게 */}
       {!expanded && (
         <>
-          <p className="mt-2.5 line-clamp-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-            {reason || program.purpose || program.summary}
-          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden>📍</span>
+              <span className="text-xs text-gray-400">지역</span>
+              <b className="font-semibold text-gray-800 dark:text-gray-100">
+                {regionLabel(program.regions)}
+              </b>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden>🏛</span>
+              <span className="text-xs text-gray-400">수행기관</span>
+              <b className="font-semibold text-gray-800 dark:text-gray-100">
+                {program.agency}
+              </b>
+            </span>
+          </div>
+          {matchedKeywords.length > 0 && (
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                🎯 매칭 이유
+              </span>
+              {matchedKeywords.map((k) => (
+                <span
+                  key={k}
+                  className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                >
+                  {k}
+                </span>
+              ))}
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="mt-2.5 inline-flex w-full items-center justify-center gap-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold text-blue-600 transition hover:border-blue-300 hover:bg-blue-50/50 dark:border-gray-700 dark:hover:bg-blue-950/30"
+            className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold text-blue-600 transition hover:border-blue-300 hover:bg-blue-50/50 dark:border-gray-700 dark:hover:bg-blue-950/30"
           >
             자세히 보기 ▾
           </button>
