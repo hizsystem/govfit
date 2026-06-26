@@ -1799,11 +1799,7 @@ const INTRO_FEATURES = [
     title: "관심공고 & 마감 캘린더",
     desc: "관심 공고를 저장하고\n신청 마감일을 캘린더로\n관리하세요.",
   },
-  {
-    img: "/features/feat-proposal.jpg",
-    title: "사업계획서 초안",
-    desc: "회사 정보와 공고를 바탕으로\n사업계획서 초안을\n자동 생성해 드려요.",
-  },
+  // 사업계획서 초안 — 기능 완성 전까지 숨김(코드는 ProposalModal로 보존)
   {
     img: "/features/feat-card.jpg",
     title: "디지털 명함",
@@ -1831,7 +1827,7 @@ const INTRO_STEPS = [
     no: "03",
     icon: "🚀",
     title: "담고 · 관리하고 · 신청",
-    desc: "관심공고를 담아 마감 캘린더로 챙기고,\n사업계획서 초안으로 신청을 준비하세요.",
+    desc: "관심공고를 담아 마감 캘린더로 챙기고,\n놓치지 않게 신청을 준비하세요.",
     glow: "238,84,31", // 코랄
   },
 ] as const;
@@ -2363,12 +2359,6 @@ function MyPageView({
             title="마감 캘린더"
             desc="달력으로 한눈에"
             onClick={() => onOpenSaved("calendar")}
-          />
-          <FeatureTile
-            icon="📝"
-            title="사업계획서 작성"
-            desc="관심공고로 초안"
-            onClick={() => onOpenSaved("list")}
           />
           <FeatureTile
             icon="💳"
@@ -3338,13 +3328,7 @@ function RecCard({
 
       <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
         <div className="flex flex-col gap-2 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => setShowProposal(true)}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-blue-600 px-5 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40"
-          >
-            📝 사업계획서 초안
-          </button>
+          {/* 사업계획서 초안 버튼 — 기능 완성 전까지 숨김 */}
           <a
             href={program.url}
             target="_blank"
