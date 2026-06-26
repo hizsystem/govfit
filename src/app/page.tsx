@@ -101,6 +101,11 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false);
   // 모바일 햄버거 메뉴 열림 상태
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // 화면(view) 전환 시 항상 페이지 최상단부터 보이게
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
   // 로그인 필수 기능인데 미로그인이면 게이트 표시
   const needsLogin =
     auth.configured && !auth.user && (view === "saved" || view === "mypage");
@@ -302,6 +307,9 @@ export default function Home() {
 
           {/* 데스크톱 메뉴 */}
           <div className="hidden flex-wrap items-center justify-end gap-1 md:flex md:gap-2">
+            <NavTab active={view === "search"} onClick={() => setView("search")}>
+              지원사업 찾기
+            </NavTab>
             <NavTab
               active={view === "newsletter"}
               onClick={() =>
@@ -385,6 +393,15 @@ export default function Home() {
         {/* 모바일 메뉴 패널 — 콘텐츠를 밀지 않고 위에 얹히도록 absolute */}
         {mobileMenuOpen && (
           <div className="absolute inset-x-0 top-full z-50 border-t border-gray-200 bg-white px-3 py-2 shadow-lg md:hidden dark:border-gray-800 dark:bg-gray-900">
+            <MobileNavItem
+              active={view === "search"}
+              onClick={() => {
+                setView("search");
+                setMobileMenuOpen(false);
+              }}
+            >
+              지원사업 찾기
+            </MobileNavItem>
             <MobileNavItem
               active={view === "newsletter"}
               onClick={() => {
