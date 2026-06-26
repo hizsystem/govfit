@@ -18,6 +18,15 @@ const PROVIDER_ID: Record<OAuthProvider, string> = {
   naver: "custom:naver",
 };
 
+/**
+ * 제공자별 OAuth scope (지정 안 하면 Supabase 기본값 사용).
+ * 카카오: 기본값이 account_email을 포함하는데, 카카오 이메일은 "비즈앱 전환"이 있어야
+ *   받을 수 있어 미설정 시 KOE205 에러가 난다. 그래서 닉네임만 요청한다.
+ */
+const PROVIDER_SCOPES: Partial<Record<OAuthProvider, string>> = {
+  kakao: "profile_nickname",
+};
+
 /** 이메일 가입/로그인 등 결과 — 성공이면 error=null */
 export interface AuthResult {
   error: string | null;
@@ -93,7 +102,7 @@ export function useAuth(): AuthState {
     await getSupabase().auth.signInWithOAuth({
       // custom:naver는 표준 Provider 유니언에 없어 캐스팅한다.
       provider: PROVIDER_ID[provider] as Provider,
-      options: { redirectTo: siteOrigin() },
+      options: { redirectTo: siteOrigin(), scopes: PROVIDER_SCOPES[provider] },
     });
   }
 
