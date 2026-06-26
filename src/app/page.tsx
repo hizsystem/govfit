@@ -3210,6 +3210,8 @@ function RecCard({
   onToggleSave: () => void;
 }) {
   const { program, score, reason, matchedReasons, matchedKeywords } = rec;
+  // 기본은 접힌 상태(요약만) — 펼치면 상세 전체를 본다
+  const [expanded, setExpanded] = useState(false);
   const [showFull, setShowFull] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
   const dday = program.deadlineEnd ? computeDday(program.deadlineEnd) : null;
@@ -3264,6 +3266,25 @@ function RecCard({
         </div>
       </div>
 
+      {/* 접힌 상태: 추천 이유 요약 + 펼치기 버튼 */}
+      {!expanded && (
+        <>
+          <p className="mt-2.5 line-clamp-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            {reason || program.purpose || program.summary}
+          </p>
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="mt-2.5 inline-flex w-full items-center justify-center gap-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold text-blue-600 transition hover:border-blue-300 hover:bg-blue-50/50 dark:border-gray-700 dark:hover:bg-blue-950/30"
+          >
+            자세히 보기 ▾
+          </button>
+        </>
+      )}
+
+      {/* 펼친 상태: 상세 전체 */}
+      {expanded && (
+        <>
       {/* 부합 키워드 — 회사 정보와 공고가 겹치는 지점 */}
       {matchedKeywords.length > 0 && (
         <div className="mt-3">
@@ -3426,6 +3447,16 @@ function RecCard({
             : "자격·평가기준 등 상세는 공고에서 확인하세요"}
         </p>
       </div>
+
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="mt-4 inline-flex w-full items-center justify-center gap-1 rounded-lg py-2 text-xs font-semibold text-gray-500 transition hover:text-blue-600 dark:text-gray-400"
+          >
+            접기 ▴
+          </button>
+        </>
+      )}
 
       {showProposal && (
         <ProposalModal
