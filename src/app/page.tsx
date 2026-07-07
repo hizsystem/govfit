@@ -2076,28 +2076,34 @@ function HomeV2() {
         </button>
       </section>
 
-      {/* 4. WHAT — 흑백 배경 사진 + 소개 글 */}
+      {/* 4. WHAT — 흑백 배경 사진, 하단이 화이트로 페이드되어 다음 섹션과 이어짐 */}
       <section className="relative overflow-hidden bg-[#1b2036] text-white">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/what-bg.jpg')" }}
           aria-hidden
         />
-        <div className="absolute inset-0 bg-[#1b2036]/55" aria-hidden />
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 py-20 sm:px-10 md:grid-cols-2 md:py-28">
+        <div className="absolute inset-0 bg-[#1b2036]/45" aria-hidden />
+        {/* 하단 화이트 페이드 — what_list 섹션(흰 배경)과 자연스럽게 연결 */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-b from-transparent to-white"
+          aria-hidden
+        />
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 pb-72 pt-24 sm:px-10 md:grid-cols-2 md:pt-28">
           <div>
-            <p className="text-sm font-medium text-white/60">
-              어떻게 성장할지 막막하신가요?
+            <p className="text-base font-medium text-white/85 sm:text-lg">
+              어떻게 성장할지{" "}
+              <span className="font-bold text-white">막막하신가요?</span>
             </p>
-            <h2 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">
-              <span className="text-brand-soft">브랜딩,</span>
+            <h2 className="mt-5 text-4xl font-extrabold leading-tight sm:text-5xl">
+              <span className="text-brand">브랜딩,</span>
               <br />
               시작부터 끝까지
               <br />
               함께합니다<span className="text-accent">.</span>
             </h2>
           </div>
-          <div className="space-y-5 text-sm leading-relaxed text-white/75 sm:text-base">
+          <div className="space-y-5 text-sm leading-relaxed text-white/80 sm:text-base">
             <p>
               브랜드라이즈는 18년간 쌓인 데이터를 기반으로 스몰브랜드의 브랜딩과
               마케팅을 돕는 주식회사 HIZ의{" "}
@@ -2121,38 +2127,57 @@ function HomeV2() {
         </div>
       </section>
 
-      {/* 5. TEXT — 배경이 자연스럽게 밝게 넘어감 */}
-      <div
-        aria-hidden
-        className="h-24 bg-gradient-to-b from-[#1b2036] to-paper"
-      />
-      <section className="bg-paper px-6 pb-10 pt-6 text-center">
-        <p className="text-sm font-medium text-muted">그래서, 우리는</p>
-        <h2 className="mt-2 text-2xl font-extrabold text-navy sm:text-4xl">
-          18년간 쌓은 노하우를{" "}
-          <span className="text-brand">무료로 제공</span>합니다.
-        </h2>
-      </section>
+      {/* 5 + 6 — what 섹션의 화이트 페이드에서 이어지는 밝은 영역 */}
+      <section className="bg-white">
+        {/* 5. TEXT */}
+        <div className="px-6 pb-2 pt-6 text-center">
+          <p className="text-sm font-medium text-muted">그래서, 우리는</p>
+          <h2 className="mt-2 text-2xl font-extrabold text-navy sm:text-4xl">
+            18년간 쌓은 노하우를{" "}
+            <span className="text-brand">무료로 제공</span>합니다.
+          </h2>
+        </div>
 
-      {/* 6. WHAT_LIST — 무료 제공 3가지 (글+이미지+버튼) */}
-      <section className="bg-paper">
-        <div className="mx-auto grid max-w-6xl gap-6 px-6 py-14 sm:px-10 md:grid-cols-3 md:py-20">
+        {/* 6. WHAT_LIST — 무료 제공 3가지 */}
+        <div className="mx-auto grid max-w-6xl gap-6 px-6 pb-24 pt-12 sm:px-10 md:grid-cols-3">
           {WHAT_LIST.map((w) => (
             <div
               key={w.title}
-              className="flex flex-col rounded-2xl border border-mist bg-white p-6 shadow-sm"
+              className="flex flex-col rounded-[28px] bg-mist p-7 text-center"
             >
-              <h3 className="text-lg font-bold text-navy">{w.title}</h3>
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">
+              <h3 className="text-xl font-bold text-navy">{w.title}</h3>
+              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">
                 {w.desc}
               </p>
-              {/* what_img — 추후 실제 이미지로 교체 */}
-              <div className="mt-5 grid aspect-[4/3] place-items-center rounded-xl bg-mist text-xs text-muted">
-                이미지
+              {/* what_img — 카카오톡 뉴스레터 목업(플레이스홀더, 추후 교체) */}
+              <div className="relative mt-6 flex-1 overflow-hidden rounded-2xl bg-[#232a44] p-4 text-left">
+                <p className="text-[9px] font-semibold tracking-wider text-white/45">
+                  BRANDRISE DAILY · 2026-07-07
+                </p>
+                <p className="mt-1 text-xs font-bold text-white">
+                  7월 7일 마케팅 뉴스레터
+                </p>
+                <div className="mt-3 space-y-1.5">
+                  {[92, 80, 88, 70, 84].map((wd, i) => (
+                    <div
+                      key={i}
+                      className="h-1.5 rounded-full bg-white/15"
+                      style={{ width: `${wd}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-xl bg-[#FAE100] text-[8px] font-black text-[#3b1e1e]">
+                  TALK
+                </div>
+                <div className="absolute bottom-3 right-3 w-3/5 rounded-lg bg-white p-2 shadow-lg">
+                  <div className="h-1.5 w-3/4 rounded-full bg-navy/20" />
+                  <div className="mt-1 h-1.5 w-1/2 rounded-full bg-navy/10" />
+                  <div className="mt-1 h-1.5 w-2/3 rounded-full bg-navy/10" />
+                </div>
               </div>
               <button
                 type="button"
-                className="mt-5 rounded-xl border border-brand py-2.5 text-sm font-bold text-brand transition hover:bg-brand hover:text-[#FAFAFA]"
+                className="mt-6 rounded-full border border-brand py-3 text-sm font-bold text-brand transition hover:bg-brand hover:text-[#FAFAFA]"
               >
                 {w.cta}
               </button>
