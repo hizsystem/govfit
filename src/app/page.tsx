@@ -1942,9 +1942,14 @@ function ConcentricCircles({
 
 /** 포트폴리오 회사 (지금은 3개 × 3반복, 추후 9개로 교체 예정) */
 const PF_COMPANIES = [
-  { name: "veggiet", tag: "브랜딩 · 패키지", from: "#e9f0ff", to: "#c8cbfb" },
-  { name: "weetamin", tag: "브랜딩 · 마케팅", from: "#e2e6ff", to: "#b8c0fb" },
-  { name: "GoVenture Forum™", tag: "브랜드 · 이벤트", from: "#eef2ff", to: "#cfd4fb" },
+  { name: "veggiet", img: "/portfolio/veggiet.jpg", from: "#e9f0ff", to: "#c8cbfb" },
+  {
+    name: "GoVenture Forum™",
+    img: "/portfolio/goventure.jpg",
+    from: "#eef2ff",
+    to: "#cfd4fb",
+  },
+  { name: "weetamin", img: "/portfolio/weetamin.jpg", from: "#e2e6ff", to: "#b8c0fb" },
 ];
 const PF_SLIDES = [...PF_COMPANIES, ...PF_COMPANIES, ...PF_COMPANIES];
 /** 유튜브(땡스 큐레이터) 최근 영상 + 채널 */
@@ -2036,20 +2041,19 @@ function HomeV2() {
                 className="relative aspect-[4/3] shrink-0"
                 style={{ width: "33.3333%" }}
               >
+                {/* 이미지 로드 전/누락 시 보이는 폴백 그라데이션 */}
                 <div
                   className="absolute inset-0"
                   style={{
                     background: `linear-gradient(135deg, ${c.from}, ${c.to})`,
                   }}
                 />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
-                  <span className="text-xs font-medium text-navy/60">
-                    {c.tag}
-                  </span>
-                  <span className="mt-1 text-xl font-extrabold text-navy sm:text-3xl">
-                    {c.name}
-                  </span>
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={c.img}
+                  alt={c.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
               </div>
             ))}
           </div>
@@ -2072,9 +2076,15 @@ function HomeV2() {
         </button>
       </section>
 
-      {/* 4. WHAT — 어두운 배경 + 소개 글 */}
-      <section className="bg-[#1b2036] text-white">
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-20 sm:px-10 md:grid-cols-2 md:py-28">
+      {/* 4. WHAT — 흑백 배경 사진 + 소개 글 */}
+      <section className="relative overflow-hidden bg-[#1b2036] text-white">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/what-bg.jpg')" }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-[#1b2036]/55" aria-hidden />
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 py-20 sm:px-10 md:grid-cols-2 md:py-28">
           <div>
             <p className="text-sm font-medium text-white/60">
               어떻게 성장할지 막막하신가요?
