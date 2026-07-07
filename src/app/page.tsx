@@ -1940,7 +1940,47 @@ function ConcentricCircles({
   );
 }
 
+/** 포트폴리오 회사 (지금은 3개 × 3반복, 추후 9개로 교체 예정) */
+const PF_COMPANIES = [
+  { name: "veggiet", tag: "브랜딩 · 패키지", from: "#e9f0ff", to: "#c8cbfb" },
+  { name: "weetamin", tag: "브랜딩 · 마케팅", from: "#e2e6ff", to: "#b8c0fb" },
+  { name: "GoVenture Forum™", tag: "브랜드 · 이벤트", from: "#eef2ff", to: "#cfd4fb" },
+];
+const PF_SLIDES = [...PF_COMPANIES, ...PF_COMPANIES, ...PF_COMPANIES];
+/** 유튜브(땡스 큐레이터) 최근 영상 + 채널 */
+const YT_VIDEOS = ["rM6gwEyfKZ8", "VY3vXUfKMEI", "8DXShoYTbeA", "s04NYW3nOxA"];
+const YT_CHANNEL =
+  "https://www.youtube.com/@%EB%95%A1%ED%81%90%EC%B1%84%EB%84%90";
+
+/** what_list 3박스 데이터 */
+const WHAT_LIST = [
+  {
+    title: "무료 상담",
+    desc: "무료 상담을 신청하고 우리 기업의\n현위치와 미래를 진단하세요.",
+    cta: "무료 상담 신청",
+  },
+  {
+    title: "데일리 마케팅 뉴스",
+    desc: "브랜드라이즈 카카오톡 채팅방에서\n매일 마케팅 트렌드 뉴스를 받아보세요.",
+    cta: "채팅방 참여하기",
+  },
+  {
+    title: "지원사업 찾기",
+    desc: "정부 지원 사업 검색 엔진을 통해\n적합한 지원사업을 찾아보세요.",
+    cta: "지원사업 알아보기",
+  },
+];
+
 function HomeV2() {
+  // 포트폴리오 슬라이더 (3개씩 노출, 화살표로 이동·루프)
+  const [pfPos, setPfPos] = useState(0);
+  const pfMax = PF_SLIDES.length - 3; // 6
+  const movePf = (d: number) =>
+    setPfPos((p) => {
+      const n = p + d;
+      return n < 0 ? pfMax : n > pfMax ? 0 : n;
+    });
+
   return (
     <>
       {/* 2. MAIN VISUAL — 동심원 배경 + branding/marketing 공전 */}
@@ -1982,6 +2022,285 @@ function HomeV2() {
           </p>
         </div>
       </section>
+
+      {/* 3. PORTFOLIO — 3개씩 노출되는 슬라이드(현재 3×3), 양옆 화살표 */}
+      <section className="relative overflow-hidden bg-paper">
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${pfPos * (100 / 3)}%)` }}
+          >
+            {PF_SLIDES.map((c, i) => (
+              <div
+                key={i}
+                className="relative aspect-[4/3] shrink-0"
+                style={{ width: "33.3333%" }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(135deg, ${c.from}, ${c.to})`,
+                  }}
+                />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
+                  <span className="text-xs font-medium text-navy/60">
+                    {c.tag}
+                  </span>
+                  <span className="mt-1 text-xl font-extrabold text-navy sm:text-3xl">
+                    {c.name}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => movePf(-1)}
+          aria-label="이전 포트폴리오"
+          className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-2xl text-navy shadow-md transition hover:bg-white sm:left-6"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          onClick={() => movePf(1)}
+          aria-label="다음 포트폴리오"
+          className="absolute right-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-2xl text-navy shadow-md transition hover:bg-white sm:right-6"
+        >
+          ›
+        </button>
+      </section>
+
+      {/* 4. WHAT — 어두운 배경 + 소개 글 */}
+      <section className="bg-[#1b2036] text-white">
+        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-20 sm:px-10 md:grid-cols-2 md:py-28">
+          <div>
+            <p className="text-sm font-medium text-white/60">
+              어떻게 성장할지 막막하신가요?
+            </p>
+            <h2 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">
+              <span className="text-brand-soft">브랜딩,</span>
+              <br />
+              시작부터 끝까지
+              <br />
+              함께합니다<span className="text-accent">.</span>
+            </h2>
+          </div>
+          <div className="space-y-5 text-sm leading-relaxed text-white/75 sm:text-base">
+            <p>
+              브랜드라이즈는 18년간 쌓인 데이터를 기반으로 스몰브랜드의 브랜딩과
+              마케팅을 돕는 주식회사 HIZ의{" "}
+              <b className="font-semibold text-white">컨설팅 레이블</b> 입니다.
+            </p>
+            <p>
+              기업이 성장하고, 글로벌로 나아가는 과정에서 결국 마주하게 되는 건{" "}
+              <b className="font-semibold text-white">브랜드와 마케팅</b>입니다.
+            </p>
+            <p>
+              다년간 대기업과 스타트업 기업들을 컨설팅하며{" "}
+              <b className="font-semibold text-white">마케팅 자산이 낭비</b>되는
+              것을 발견했습니다.
+            </p>
+            <p>
+              이러한 현상을 해결하는 데에는 누군가의{" "}
+              <b className="font-semibold text-white">진심어린 컨설팅</b>이
+              필요하다는 것을 깨달았습니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. TEXT — 배경이 자연스럽게 밝게 넘어감 */}
+      <div
+        aria-hidden
+        className="h-24 bg-gradient-to-b from-[#1b2036] to-paper"
+      />
+      <section className="bg-paper px-6 pb-10 pt-6 text-center">
+        <p className="text-sm font-medium text-muted">그래서, 우리는</p>
+        <h2 className="mt-2 text-2xl font-extrabold text-navy sm:text-4xl">
+          18년간 쌓은 노하우를{" "}
+          <span className="text-brand">무료로 제공</span>합니다.
+        </h2>
+      </section>
+
+      {/* 6. WHAT_LIST — 무료 제공 3가지 (글+이미지+버튼) */}
+      <section className="bg-paper">
+        <div className="mx-auto grid max-w-6xl gap-6 px-6 py-14 sm:px-10 md:grid-cols-3 md:py-20">
+          {WHAT_LIST.map((w) => (
+            <div
+              key={w.title}
+              className="flex flex-col rounded-2xl border border-mist bg-white p-6 shadow-sm"
+            >
+              <h3 className="text-lg font-bold text-navy">{w.title}</h3>
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">
+                {w.desc}
+              </p>
+              {/* what_img — 추후 실제 이미지로 교체 */}
+              <div className="mt-5 grid aspect-[4/3] place-items-center rounded-xl bg-mist text-xs text-muted">
+                이미지
+              </div>
+              <button
+                type="button"
+                className="mt-5 rounded-xl border border-brand py-2.5 text-sm font-bold text-brand transition hover:bg-brand hover:text-[#FAFAFA]"
+              >
+                {w.cta}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 7. TEXT — 블루 배경 브랜드 문구 */}
+      <section className="bg-brand text-white">
+        <div className="mx-auto max-w-6xl px-6 py-16 sm:px-10 sm:py-20">
+          <p className="text-2xl font-bold sm:text-3xl">Where Brand Rise.</p>
+          <p className="mt-2 text-2xl font-bold sm:text-3xl">
+            좋은 기업이{" "}
+            <span className="font-extrabold text-brand-soft">더 좋은 기회</span>를
+            만나는 곳.
+          </p>
+        </div>
+      </section>
+
+      {/* 8. YOUTUBE — 땡스 큐레이터 최근 영상 4개 연동 */}
+      <section className="bg-mist">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 sm:px-10 sm:py-24 md:grid-cols-2">
+          <div>
+            <p className="text-sm font-semibold text-muted">
+              브랜드라이즈에서 운영하는
+            </p>
+            <p className="mt-1 text-sm font-semibold text-navy">유튜브 채널</p>
+            <h2 className="mt-1 text-4xl font-extrabold text-navy sm:text-5xl">
+              땡스 큐레이터<span className="text-accent">.</span>
+            </h2>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
+              일하고 배우고 살면서 건진{" "}
+              <b className="font-semibold text-navy">마케팅 및 브랜딩 인사이트</b>를
+              이야기합니다.
+            </p>
+            <a
+              href={YT_CHANNEL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-block rounded-full border border-accent px-5 py-2.5 text-sm font-bold text-accent transition hover:bg-accent hover:text-[#FAFAFA]"
+            >
+              Youtube 채널
+            </a>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {YT_VIDEOS.map((id) => (
+              <div
+                key={id}
+                className="aspect-video overflow-hidden rounded-xl bg-black shadow-sm"
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${id}`}
+                  title="땡스 큐레이터 영상"
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="h-full w-full"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 9. END — 그라데이션 + 동심원 배경, 동심원 hover 버튼 */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-mist to-periwinkle">
+        <ConcentricCircles className="opacity-90" />
+        <div className="relative z-10 px-6 py-24 text-center sm:py-32">
+          <h2 className="text-2xl font-extrabold text-navy sm:text-4xl">
+            대표님을 위한 모든 정보.
+          </h2>
+          <p className="mt-1 text-2xl font-extrabold text-brand sm:text-4xl">
+            당신의 성장을 브랜드라이즈에서
+          </p>
+          <button
+            type="button"
+            className="group relative mt-8 overflow-hidden rounded-full bg-brand px-8 py-4 text-base font-bold text-white shadow-lg shadow-brand/30 transition hover:shadow-xl"
+          >
+            <span className="relative z-10">무료상담 신청하기</span>
+            {/* hover 시 버튼 가운데서 그려지는 동심원 */}
+            <span className="pointer-events-none absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 transition-all duration-700 group-hover:h-40 group-hover:w-40 group-hover:opacity-0" />
+            <span className="pointer-events-none absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 transition-all delay-100 duration-700 group-hover:h-64 group-hover:w-64 group-hover:opacity-0" />
+          </button>
+        </div>
+      </section>
+
+      {/* 10. FOOTER — 기존 정보 유지, 배경 #3D476D / 텍스트 #FAFAFA */}
+      <footer className="bg-navy text-[#FAFAFA]">
+        <div className="mx-auto max-w-6xl px-6 py-12 sm:px-10">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+            <div className="col-span-2 sm:col-span-1">
+              <span className="text-lg font-extrabold">
+                Brand Rise<span className="text-accent">.</span>
+              </span>
+              <p className="mt-3 text-sm font-semibold text-[#FAFAFA]/90">
+                브랜드라이즈
+              </p>
+              <p className="mt-1 text-xs text-[#FAFAFA]/60">
+                스몰브랜드 브랜딩·마케팅 컨설팅
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold">문의</h4>
+              <ul className="mt-3 space-y-1 text-xs leading-snug text-[#FAFAFA]/70">
+                <li>
+                  <a
+                    href="mailto:yeji_lee@hizpeople.com"
+                    className="hover:text-[#FAFAFA]"
+                  >
+                    yeji_lee@hizpeople.com
+                  </a>
+                </li>
+                <li>개인정보 열람·정정·삭제 문의</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold">고객지원</h4>
+              <ul className="mt-3 space-y-1 text-xs leading-snug text-[#FAFAFA]/70">
+                <li>
+                  <a href="tel:+82-2-6925-0034" className="hover:text-[#FAFAFA]">
+                    (+82) 02-6925-0034
+                  </a>
+                </li>
+                <li>고객지원·서비스·제휴 등 기타 문의</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold">SNS</h4>
+              <ul className="mt-3 space-y-1 text-xs leading-snug text-[#FAFAFA]/70">
+                <li>
+                  <a
+                    href="https://www.instagram.com/brandrise_kr/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#FAFAFA]"
+                  >
+                    브랜드라이즈 인스타그램
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.instagram.com/goventureforum/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#FAFAFA]"
+                  >
+                    고벤처포럼 인스타그램
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-8 border-t border-white/10 pt-5 text-xs text-[#FAFAFA]/50">
+            © 2026 Brand Rise · 브랜드라이즈
+          </div>
+        </div>
+      </footer>
     </>
   );
 }
