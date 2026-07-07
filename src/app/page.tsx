@@ -1918,7 +1918,7 @@ function ConcentricCircles({
   className?: string;
   color?: string;
 }) {
-  const rings = [340, 520, 720, 940, 1180];
+  const rings = [900, 1260, 1660, 2100, 2560];
   return (
     <div
       className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${className}`}
@@ -1932,7 +1932,7 @@ function ConcentricCircles({
             height: d,
             width: d,
             border: `1px ${i % 2 === 0 ? "solid" : "dashed"} ${color}`,
-            opacity: 0.16 - i * 0.015,
+            opacity: 0.32 - i * 0.05,
           }}
         />
       ))}
@@ -1972,11 +1972,13 @@ function HomeV2() {
 
         {/* 중앙 카피 */}
         <div className="relative z-10 px-6 text-center">
-          <h1 className="text-5xl font-extrabold tracking-tight text-brand sm:text-7xl">
+          <h1 className="text-5xl font-bold tracking-tight text-brand sm:text-7xl">
             Where Brand Rise<span className="text-accent">.</span>
           </h1>
           <p className="mt-5 text-lg font-semibold text-navy sm:text-2xl">
-            좋은 기업이, <span className="text-brand">더 좋은 기회</span>를 만나는 곳
+            좋은 기업이,{" "}
+            <span className="font-extrabold text-brand">더 좋은 기회</span>를 만나는
+            곳
           </p>
         </div>
       </section>
