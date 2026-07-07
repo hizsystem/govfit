@@ -109,11 +109,20 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false);
   // 모바일 햄버거 메뉴 열림 상태
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // 스크롤 시 nav를 반투명+블러로 (top에선 solid)
+  const [scrolled, setScrolled] = useState(false);
 
   // 화면(view) 전환 시 항상 페이지 최상단부터 보이게
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   // 로그인 필수 기능인데 미로그인이면 게이트 표시
   const needsLogin =
     auth.configured && !auth.user && (view === "saved" || view === "mypage");
@@ -350,72 +359,59 @@ export default function Home() {
 
   return (
     <>
-      <nav className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-900/80">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
+      <nav
+        className={`sticky top-0 z-50 transition-colors duration-300 ${
+          scrolled ? "bg-brand/70 backdrop-blur-md" : "bg-brand"
+        }`}
+      >
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
+          {/* 로고 */}
           <button
             type="button"
             onClick={() => setView("intro")}
-            className="flex items-center gap-2"
-            aria-label="브랜드라이즈 소개"
+            className="text-xl font-extrabold tracking-tight text-white"
+            aria-label="Brand Rise 홈"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand-logo.svg"
-              alt="Brand Rise 로고"
-              className="h-9 w-9 rounded-lg object-cover"
-            />
-            {/* 모바일에서는 브랜드명 숨김 (로고만) */}
-            <span className="hidden text-lg font-extrabold tracking-tight text-gray-900 md:inline dark:text-gray-100">
-              Brand Rise
-            </span>
+            Brand Rise<span className="text-accent">.</span>
           </button>
 
-          {/* 데스크톱 메뉴 */}
-          <div className="hidden flex-wrap items-center justify-end gap-1 md:flex md:gap-2">
-            <NavTab active={view === "search"} onClick={() => setView("search")}>
-              지원사업 찾기
-            </NavTab>
-            <NavTab active={view === "saved"} onClick={() => openSaved("calendar")}>
-              관심공고 {savedList.length}
-            </NavTab>
-            <NavTab
-              active={view === "mypage"}
-              onClick={() => setView((v) => (v === "mypage" ? "search" : "mypage"))}
-            >
-              마이페이지
-            </NavTab>
-            {auth.configured &&
-              (auth.user ? (
-                <div className="flex shrink-0 items-center gap-1 pl-1">
-                  <span className="hidden max-w-[8rem] truncate text-xs font-semibold text-gray-600 lg:inline dark:text-gray-300">
-                    {displayUserName(auth.user)}님
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => auth.signOut()}
-                    className="shrink-0 px-2 py-4 text-sm font-semibold text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                  >
-                    로그아웃
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowLogin(true)}
-                  className="ml-1 shrink-0 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-                >
-                  로그인
-                </button>
-              ))}
+          {/* 데스크톱 메뉴 (버튼 연결은 추후) */}
+          <div className="hidden items-center gap-8 md:flex">
+            <div className="flex items-center gap-7 text-sm font-semibold text-white/90">
+              <button type="button" className="transition hover:text-white">
+                지원사업 찾기
+              </button>
+              <button type="button" className="transition hover:text-white">
+                서비스 문의
+              </button>
+              <button type="button" className="transition hover:text-white">
+                무료상담
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="rounded-full bg-white px-4 py-2 text-sm font-bold text-brand transition hover:bg-white/90"
+              >
+                무료상담
+              </button>
+              {/* 로그인: hover 시 흰색 채움 + 글자 하이라이트 블루 */}
+              <button
+                type="button"
+                className="rounded-full border border-white/70 px-4 py-2 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
+              >
+                로그인
+              </button>
+            </div>
           </div>
 
-          {/* 모바일 햄버거 버튼 */}
+          {/* 모바일 햄버거 */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((o) => !o)}
             aria-label="메뉴"
             aria-expanded={mobileMenuOpen}
-            className="grid h-10 w-10 place-items-center rounded-lg text-gray-700 transition hover:bg-gray-100 md:hidden dark:text-gray-200 dark:hover:bg-gray-800"
+            className="grid h-10 w-10 place-items-center rounded-lg text-white transition hover:bg-white/10 md:hidden"
           >
             <svg
               viewBox="0 0 24 24"
@@ -441,60 +437,33 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 모바일 메뉴 패널 — 콘텐츠를 밀지 않고 위에 얹히도록 absolute */}
+        {/* 모바일 메뉴 패널 */}
         {mobileMenuOpen && (
-          <div className="absolute inset-x-0 top-full z-50 border-t border-gray-200 bg-white px-3 py-2 shadow-lg md:hidden dark:border-gray-800 dark:bg-gray-900">
-            <MobileNavItem
-              active={view === "search"}
-              onClick={() => {
-                setView("search");
-                setMobileMenuOpen(false);
-              }}
-            >
-              지원사업 찾기
-            </MobileNavItem>
-            <MobileNavItem
-              active={view === "saved"}
-              onClick={() => {
-                openSaved("calendar");
-                setMobileMenuOpen(false);
-              }}
-            >
-              관심공고 {savedList.length}
-            </MobileNavItem>
-            <MobileNavItem
-              active={view === "mypage"}
-              onClick={() => {
-                setView((v) => (v === "mypage" ? "search" : "mypage"));
-                setMobileMenuOpen(false);
-              }}
-            >
-              마이페이지
-            </MobileNavItem>
-            {auth.configured &&
-              (auth.user ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    auth.signOut();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full rounded-lg px-3 py-3 text-left text-sm font-semibold text-gray-500 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800"
-                >
-                  로그아웃 ({displayUserName(auth.user)}님)
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowLogin(true);
-                    setMobileMenuOpen(false);
-                  }}
-                  className="mt-1 w-full rounded-lg bg-blue-600 px-3 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
-                >
-                  로그인
-                </button>
-              ))}
+          <div className="absolute inset-x-0 top-full z-50 bg-brand px-5 pb-4 pt-1 shadow-lg md:hidden">
+            {["지원사업 찾기", "서비스 문의", "무료상담"].map((label) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full rounded-lg px-3 py-3 text-left text-sm font-semibold text-white/90 transition hover:bg-white/10"
+              >
+                {label}
+              </button>
+            ))}
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                className="flex-1 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-brand"
+              >
+                무료상담
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-full border border-white/70 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
+              >
+                로그인
+              </button>
+            </div>
           </div>
         )}
       </nav>
@@ -503,7 +472,13 @@ export default function Home() {
         <LoginModal auth={auth} onClose={() => setShowLogin(false)} />
       )}
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
+      <main
+        className={
+          view === "intro"
+            ? "flex-1"
+            : "mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6"
+        }
+      >
         {view !== "mypage" && view !== "intro" && (
         <header className="mb-8 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-6 sm:p-8 dark:border-gray-800 dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
@@ -537,7 +512,7 @@ export default function Home() {
           onLogin={() => setShowLogin(true)}
         />
       ) : view === "intro" ? (
-        <IntroView stats={stats} onStart={() => setView("search")} />
+        <HomeV2 />
       ) : view === "mypage" ? (
         <MyPageView
           myProfile={myProfile}
@@ -1928,6 +1903,84 @@ function FeatureCarousel() {
         ))}
       </div>
     </div>
+  );
+}
+
+// ===========================================================================
+// HomeV2 — Brand Rise 브랜딩/마케팅 컨설팅 소개 랜딩(대문). 섹션별로 순차 구축.
+// ===========================================================================
+
+/** 겹치는 실선·점선 동심원 (메인 비주얼 / end 섹션 배경) */
+function ConcentricCircles({
+  className = "",
+  color = "var(--color-brand)",
+}: {
+  className?: string;
+  color?: string;
+}) {
+  const rings = [340, 520, 720, 940, 1180];
+  return (
+    <div
+      className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${className}`}
+      aria-hidden
+    >
+      {rings.map((d, i) => (
+        <div
+          key={d}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            height: d,
+            width: d,
+            border: `1px ${i % 2 === 0 ? "solid" : "dashed"} ${color}`,
+            opacity: 0.16 - i * 0.015,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function HomeV2() {
+  return (
+    <>
+      {/* 2. MAIN VISUAL — 동심원 배경 + branding/marketing 공전 */}
+      <section className="relative flex min-h-[86vh] items-center justify-center overflow-hidden bg-gradient-to-b from-mist/60 via-paper to-paper">
+        <ConcentricCircles />
+
+        {/* 공전하는 단어들 (자전 없음) — 나중에 기업 로고로 교체 예정 */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          aria-hidden
+        >
+          <div className="revolve absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2">
+            <span className="counter-revolve absolute left-1/2 top-0 -translate-x-1/2 text-sm font-semibold text-muted">
+              branding
+            </span>
+            <span className="counter-revolve absolute bottom-0 left-1/2 -translate-x-1/2 text-sm font-semibold text-muted">
+              marketing
+            </span>
+          </div>
+          <div className="revolve absolute left-1/2 top-1/2 h-[860px] w-[860px] -translate-x-1/2 -translate-y-1/2">
+            <span className="counter-revolve absolute left-0 top-1/2 -translate-y-1/2 text-base font-semibold text-muted/70">
+              marketing
+            </span>
+            <span className="counter-revolve absolute right-0 top-1/2 -translate-y-1/2 text-base font-semibold text-muted/70">
+              branding
+            </span>
+          </div>
+        </div>
+
+        {/* 중앙 카피 */}
+        <div className="relative z-10 px-6 text-center">
+          <h1 className="text-5xl font-extrabold tracking-tight text-brand sm:text-7xl">
+            Where Brand Rise<span className="text-accent">.</span>
+          </h1>
+          <p className="mt-5 text-lg font-semibold text-navy sm:text-2xl">
+            좋은 기업이, <span className="text-brand">더 좋은 기회</span>를 만나는 곳
+          </p>
+        </div>
+      </section>
+    </>
   );
 }
 
