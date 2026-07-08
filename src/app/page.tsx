@@ -1011,12 +1011,12 @@ function FloatingContact() {
           {/* 두 개의 막대가 회전하며 = ↔ ✕ 로 부드럽게 변형 */}
           <span className="relative block h-6 w-6" aria-hidden>
             <span
-              className={`absolute inset-0 m-auto h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-in-out ${
+              className={`absolute inset-0 m-auto h-[3px] w-5 rounded-full bg-current transition-transform duration-300 ease-in-out ${
                 open ? "rotate-45" : "-translate-y-1"
               }`}
             />
             <span
-              className={`absolute inset-0 m-auto h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-in-out ${
+              className={`absolute inset-0 m-auto h-[3px] w-5 rounded-full bg-current transition-transform duration-300 ease-in-out ${
                 open ? "-rotate-45" : "translate-y-1"
               }`}
             />
@@ -2458,8 +2458,8 @@ function HomeV2() {
         </div>
       </section>
 
-      {/* 10. FOOTER — 기존 정보 유지, 배경 #3D476D / 텍스트 #FAFAFA */}
-      <footer className="bg-navy text-[#FAFAFA]">
+      {/* 10. FOOTER — 기존 정보 유지, 배경 #313A5F / 텍스트 #FAFAFA */}
+      <footer className="bg-[#313A5F] text-[#FAFAFA]">
         <div className="mx-auto max-w-6xl px-6 py-12 sm:px-10">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             <div className="col-span-2 sm:col-span-1">
