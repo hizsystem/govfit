@@ -369,7 +369,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setView("intro")}
-            className="text-xl font-extrabold tracking-tight text-white"
+            className="text-xl font-bold tracking-tight text-white"
             aria-label="Brand Rise 홈"
           >
             Brand Rise<span className="text-accent">.</span>
@@ -377,7 +377,7 @@ export default function Home() {
 
           {/* 데스크톱 메뉴 (버튼 연결은 추후) */}
           <div className="hidden items-center gap-8 md:flex">
-            <div className="flex items-center gap-7 text-sm font-semibold text-white/90">
+            <div className="flex items-center gap-8 text-base font-medium text-white">
               <button type="button" className="transition hover:text-white">
                 지원사업 찾기
               </button>
@@ -2034,9 +2034,9 @@ function HomeV2() {
           <h1 className="text-5xl font-bold tracking-tight text-brand sm:text-7xl">
             Where Brand Rise<span className="text-accent">.</span>
           </h1>
-          <p className="mt-5 text-lg font-semibold text-navy sm:text-2xl">
+          <p className="mt-5 text-lg font-normal tracking-tight text-navy sm:text-2xl">
             좋은 기업이,{" "}
-            <span className="font-extrabold text-brand">더 좋은 기회</span>를 만나는
+            <span className="font-semibold text-brand">더 좋은 기회</span>를 만나는
             곳
           </p>
         </div>
@@ -2104,11 +2104,11 @@ function HomeV2() {
         />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-6 pb-72 pt-24 sm:px-10 md:grid-cols-2 md:pt-28">
           <div>
-            <p className="text-base font-medium text-white/85 sm:text-lg">
+            <p className="text-xl font-normal text-white sm:text-2xl">
               어떻게 성장할지{" "}
-              <span className="font-bold text-white">막막하신가요?</span>
+              <span className="font-semibold">막막하신가요?</span>
             </p>
-            <h2 className="mt-5 text-4xl font-extrabold leading-tight sm:text-5xl">
+            <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-5xl">
               <span className="text-brand">브랜딩,</span>
               <br />
               시작부터 끝까지
@@ -2116,25 +2116,34 @@ function HomeV2() {
               함께합니다<span className="text-accent">.</span>
             </h2>
           </div>
-          <div className="space-y-5 text-sm leading-relaxed text-white/80 sm:text-base">
+          <div className="space-y-6 text-base font-normal leading-relaxed text-white sm:text-lg">
             <p>
-              브랜드라이즈는 18년간 쌓인 데이터를 기반으로 스몰브랜드의 브랜딩과
-              마케팅을 돕는 주식회사 HIZ의{" "}
-              <b className="font-semibold text-white">컨설팅 레이블</b> 입니다.
+              브랜드라이즈는 18년간 쌓인 데이터를 기반으로
+              <br />
+              스몰브랜드의 브랜딩과 마케팅을 돕는
+              <br />
+              주식회사 HIZ의{" "}
+              <b className="font-semibold">컨설팅 레이블</b> 입니다.
             </p>
             <p>
-              기업이 성장하고, 글로벌로 나아가는 과정에서 결국 마주하게 되는 건{" "}
-              <b className="font-semibold text-white">브랜드와 마케팅</b>입니다.
+              기업이 성장하고, 글로벌로 나아가는 과정에서
+              <br />
+              결국 마주하게 되는 건{" "}
+              <b className="font-semibold">브랜드와 마케팅</b>입니다.
             </p>
             <p>
-              다년간 대기업과 스타트업 기업들을 컨설팅하며{" "}
-              <b className="font-semibold text-white">마케팅 자산이 낭비</b>되는
-              것을 발견했습니다.
+              다년간 대기업과 스타트업 기업들을 컨설팅하며
+              <br />
+              <b className="font-semibold">마케팅 자산이 낭비</b>되는 것을
+              발견했습니다.
             </p>
             <p>
-              이러한 현상을 해결하는 데에는 누군가의{" "}
-              <b className="font-semibold text-white">진심어린 컨설팅</b>이
-              필요하다는 것을 깨달았습니다.
+              이러한 현상을 해결하는 데에는
+              <br />
+              누군가의 <b className="font-semibold">진심어린 컨설팅</b>이
+              필요하다는 것을
+              <br />
+              깨달았습니다.
             </p>
           </div>
         </div>
@@ -2144,10 +2153,12 @@ function HomeV2() {
       <section className="bg-white">
         {/* 5. TEXT */}
         <div className="px-6 pb-2 pt-6 text-center">
-          <p className="text-sm font-medium text-muted">그래서, 우리는</p>
-          <h2 className="mt-2 text-2xl font-extrabold text-navy sm:text-4xl">
-            18년간 쌓은 노하우를{" "}
-            <span className="text-brand">무료로 제공</span>합니다.
+          <p className="text-lg font-medium text-muted">그래서, 우리는</p>
+          <h2 className="mt-2 text-2xl text-navy sm:text-4xl">
+            <span className="font-bold">18년간 쌓은 노하우</span>
+            <span className="font-normal">를 </span>
+            <span className="font-bold text-brand">무료로 제공</span>
+            <span className="font-normal">합니다.</span>
           </h2>
         </div>
 
@@ -2158,8 +2169,8 @@ function HomeV2() {
               key={w.title}
               className="flex flex-col rounded-[28px] bg-mist p-7 text-center"
             >
-              <h3 className="text-xl font-bold text-navy">{w.title}</h3>
-              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">
+              <h3 className="text-2xl font-semibold text-[#080808]">{w.title}</h3>
+              <p className="mt-3 whitespace-pre-line text-base font-medium leading-snug text-navy">
                 {w.desc}
               </p>
               {/* what_img — 카카오톡 뉴스레터 목업(플레이스홀더, 추후 교체) */}
@@ -2190,7 +2201,7 @@ function HomeV2() {
               </div>
               <button
                 type="button"
-                className="mt-6 rounded-full border border-brand py-3 text-sm font-bold text-brand transition hover:bg-brand hover:text-[#FAFAFA]"
+                className="mt-6 rounded-full border border-brand py-3 text-sm font-semibold text-brand transition hover:bg-brand hover:text-[#FAFAFA]"
               >
                 {w.cta}
               </button>
@@ -2202,11 +2213,12 @@ function HomeV2() {
       {/* 7. TEXT — 블루 배경 브랜드 문구 */}
       <section className="bg-brand text-white">
         <div className="mx-auto max-w-6xl px-6 py-16 sm:px-10 sm:py-20">
-          <p className="text-2xl font-bold sm:text-3xl">Where Brand Rise.</p>
-          <p className="mt-2 text-2xl font-bold sm:text-3xl">
-            좋은 기업이{" "}
-            <span className="font-extrabold text-brand-soft">더 좋은 기회</span>를
-            만나는 곳.
+          <p className="text-2xl font-semibold tracking-wide sm:text-3xl">
+            Where Brand Rise<span className="text-accent">.</span>
+          </p>
+          <p className="mt-2 text-3xl font-normal sm:text-5xl">
+            좋은 기업이 <span className="font-semibold">더 좋은 기회</span>를 만나는
+            곳.
           </p>
         </div>
       </section>
@@ -2215,23 +2227,25 @@ function HomeV2() {
       <section className="bg-mist">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 sm:px-10 sm:py-24 md:grid-cols-2">
           <div>
-            <p className="text-sm font-semibold text-muted">
+            <p className="text-lg text-navy sm:text-xl">
               브랜드라이즈에서 운영하는
+              <br />
+              <span className="font-semibold">유튜브 채널</span>
             </p>
-            <p className="mt-1 text-sm font-semibold text-navy">유튜브 채널</p>
-            <h2 className="mt-1 text-4xl font-extrabold text-navy sm:text-5xl">
+            <h2 className="mt-2 text-4xl font-bold text-navy sm:text-5xl">
               땡스 큐레이터<span className="text-accent">.</span>
             </h2>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
-              일하고 배우고 살면서 건진{" "}
-              <b className="font-semibold text-navy">마케팅 및 브랜딩 인사이트</b>를
+            <p className="mt-5 max-w-sm text-sm leading-relaxed text-navy sm:text-base">
+              일하고 배우고 살면서 건진
+              <br />
+              <b className="font-semibold">마케팅 및 브랜딩 인사이트</b>를
               이야기합니다.
             </p>
             <a
               href={YT_CHANNEL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block rounded-full border border-accent px-5 py-2.5 text-sm font-bold text-accent transition hover:bg-accent hover:text-[#FAFAFA]"
+              className="mt-6 inline-block rounded-2xl border border-accent px-6 py-3 text-sm font-semibold text-accent transition hover:bg-accent hover:text-[#FAFAFA]"
             >
               Youtube 채널
             </a>
@@ -2260,15 +2274,15 @@ function HomeV2() {
       <section className="relative overflow-hidden bg-gradient-to-b from-mist to-periwinkle">
         <ConcentricCircles className="opacity-90" />
         <div className="relative z-10 px-6 py-24 text-center sm:py-32">
-          <h2 className="text-2xl font-extrabold text-navy sm:text-4xl">
-            대표님을 위한 모든 정보.
+          <h2 className="text-2xl font-bold text-[#181818] sm:text-4xl">
+            대표님을 위한 모든 정보<span className="text-brand">.</span>
           </h2>
-          <p className="mt-1 text-2xl font-extrabold text-brand sm:text-4xl">
-            당신의 성장을 브랜드라이즈에서
+          <p className="mt-3 text-2xl font-bold text-[#181818] sm:text-4xl">
+            <span className="text-brand">당신의 성장</span>을 브랜드라이즈에서
           </p>
           <button
             type="button"
-            className="group relative mt-8 overflow-hidden rounded-full bg-brand px-8 py-4 text-base font-bold text-white shadow-lg shadow-brand/30 transition hover:shadow-xl"
+            className="group relative mt-8 overflow-hidden rounded-full bg-brand px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:shadow-xl"
           >
             <span className="relative z-10">무료상담 신청하기</span>
             {/* hover 시 버튼 가운데서 그려지는 동심원 */}
