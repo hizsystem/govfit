@@ -386,7 +386,11 @@ export default function Home() {
                 scrolled ? "text-brand" : "text-white"
               }`}
             >
-              <button type="button" className="transition hover:opacity-60">
+              <button
+                type="button"
+                onClick={() => setView("search")}
+                className="transition hover:opacity-60"
+              >
                 지원사업 찾기
               </button>
               <button type="button" className="transition hover:opacity-60">
@@ -464,7 +468,10 @@ export default function Home() {
               <button
                 key={label}
                 type="button"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (label === "지원사업 찾기") setView("search");
+                }}
                 className="w-full rounded-lg px-3 py-3 text-left text-sm font-semibold text-white/90 transition hover:bg-white/10"
               >
                 {label}
