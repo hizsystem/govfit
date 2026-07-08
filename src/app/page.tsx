@@ -1978,14 +1978,27 @@ const WHAT_LIST = [
 ];
 
 function HomeV2() {
-  // 포트폴리오 슬라이더 (3개씩 노출, 화살표로 이동·루프)
+  // 포트폴리오 슬라이더 (데스크톱 3개 / 모바일 1개 중앙 + 좌우 미리보기)
   const [pfPos, setPfPos] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const pfMax = PF_SLIDES.length - 3; // 6
   const movePf = (d: number) =>
     setPfPos((p) => {
       const n = p + d;
       return n < 0 ? pfMax : n > pfMax ? 0 : n;
     });
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // 모바일: 중앙 카드(80%) + 좌우 10% 미리보기 (가운데 = pfPos+1 슬라이드)
+  // 데스크톱: 3개(pfPos부터) 노출
+  const pfTx = isMobile ? 10 - (pfPos + 1) * 80 : -(pfPos * (100 / 3));
 
   return (
     <>
@@ -2034,13 +2047,12 @@ function HomeV2() {
         <div className="overflow-hidden">
           <div
             className="flex transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${pfPos * (100 / 3)}%)` }}
+            style={{ transform: `translateX(${pfTx}%)` }}
           >
             {PF_SLIDES.map((c, i) => (
               <div
                 key={i}
-                className="relative aspect-[4/3] shrink-0"
-                style={{ width: "33.3333%" }}
+                className="relative aspect-[4/3] w-4/5 shrink-0 md:w-1/3"
               >
                 {/* 이미지 로드 전/누락 시 보이는 폴백 그라데이션 */}
                 <div
