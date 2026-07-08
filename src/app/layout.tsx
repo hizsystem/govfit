@@ -19,9 +19,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Brand Rise — 우리 회사 맞춤 정부지원사업 추천",
+  title: "Brand Rise — 스몰브랜드 브랜딩·마케팅 컨설팅",
   description:
-    "회사 정보를 입력하면 조건에 맞는 정부지원사업을 AI가 추천해드립니다.",
+    "좋은 기업이, 더 좋은 기회를 만나는 곳. 18년간 쌓은 노하우로 스몰브랜드의 브랜딩과 마케팅을 시작부터 끝까지 함께합니다.",
 };
 
 export default function RootLayout({
