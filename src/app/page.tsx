@@ -1918,7 +1918,8 @@ function ConcentricCircles({
   className?: string;
   color?: string;
 }) {
-  const rings = [900, 1260, 1660, 2100, 2560];
+  // vmin 기준 → 데스크톱에선 적당히 작게, 모바일에선 화면에 맞게 작게 보임
+  const rings = [64, 90, 118, 148, 180];
   return (
     <div
       className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${className}`}
@@ -1929,8 +1930,8 @@ function ConcentricCircles({
           key={d}
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{
-            height: d,
-            width: d,
+            height: `${d}vmin`,
+            width: `${d}vmin`,
             border: `1px ${i % 2 === 0 ? "solid" : "dashed"} ${color}`,
             opacity: 0.32 - i * 0.05,
           }}
@@ -1997,19 +1998,19 @@ function HomeV2() {
           className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           aria-hidden
         >
-          <div className="revolve absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2">
-            <span className="counter-revolve absolute left-1/2 top-0 -translate-x-1/2 text-sm font-semibold text-muted">
+          <div className="revolve absolute left-1/2 top-1/2 h-[90vmin] w-[90vmin] -translate-x-1/2 -translate-y-1/2">
+            <span className="counter-revolve absolute left-1/2 top-0 -translate-x-1/2 text-xs font-semibold text-muted sm:text-sm">
               branding
             </span>
-            <span className="counter-revolve absolute bottom-0 left-1/2 -translate-x-1/2 text-sm font-semibold text-muted">
+            <span className="counter-revolve absolute bottom-0 left-1/2 -translate-x-1/2 text-xs font-semibold text-muted sm:text-sm">
               marketing
             </span>
           </div>
-          <div className="revolve absolute left-1/2 top-1/2 h-[860px] w-[860px] -translate-x-1/2 -translate-y-1/2">
-            <span className="counter-revolve absolute left-0 top-1/2 -translate-y-1/2 text-base font-semibold text-muted/70">
+          <div className="revolve absolute left-1/2 top-1/2 h-[148vmin] w-[148vmin] -translate-x-1/2 -translate-y-1/2">
+            <span className="counter-revolve absolute left-0 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted/70 sm:text-base">
               marketing
             </span>
-            <span className="counter-revolve absolute right-0 top-1/2 -translate-y-1/2 text-base font-semibold text-muted/70">
+            <span className="counter-revolve absolute right-0 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted/70 sm:text-base">
               branding
             </span>
           </div>
