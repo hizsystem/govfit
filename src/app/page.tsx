@@ -362,7 +362,7 @@ export default function Home() {
       <nav
         className={`sticky top-0 z-50 transition-colors duration-300 ${
           scrolled
-            ? "border-b border-black/5 backdrop-blur-md"
+            ? "border-b border-black/5 bg-white/70 backdrop-blur-md"
             : "bg-brand"
         }`}
       >
@@ -2114,7 +2114,7 @@ function HomeV2() {
         {/* 중앙 카피 */}
         <div className="relative z-10 px-6 text-center">
           <h1 className="text-5xl font-bold tracking-tight text-brand sm:text-7xl">
-            Where Brand Rise<span className="text-accent">.</span>
+            Where <br className="sm:hidden" />Brand Rise<span className="text-accent">.</span>
           </h1>
           <p className="mt-5 text-lg font-normal tracking-tight text-navy sm:text-2xl">
             좋은 기업이,{" "}
@@ -2264,6 +2264,7 @@ function HomeV2() {
           <h2 className="mt-2 text-2xl text-navy sm:text-4xl">
             <span className="font-bold">18년간 쌓은 노하우</span>
             <span className="font-normal">를 </span>
+            <br className="sm:hidden" />
             <span className="font-bold text-brand">무료로 제공</span>
             <span className="font-normal">합니다.</span>
           </h2>
@@ -2333,7 +2334,8 @@ function HomeV2() {
               backgroundClip: "text",
             }}
           >
-            좋은 기업이 <span className="font-bold">더 좋은 기회</span>를 만나는 곳.
+            좋은 기업이 <br className="sm:hidden" />
+            <span className="font-bold">더 좋은 기회</span>를 만나는 곳.
           </p>
         </div>
       </section>
