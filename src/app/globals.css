@@ -166,6 +166,25 @@ html {
 .revolve { animation: revolve 90s linear infinite; }
 .counter-revolve { animation: counter-revolve 90s linear infinite; }
 
+/* 메인 비주얼 — 동심원이 가운데서 바깥으로 퍼지며 점점 연해져 사라짐(무한) */
+@keyframes ring-out {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  15% { opacity: 0.3; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.ring-out { animation: ring-out 9s linear infinite; }
+
+/* 단어(branding/marketing)가 동심원 따라 바깥으로 이동하며 사라짐(무한) */
+@keyframes word-out {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  18% { opacity: 0.5; }
+  100% {
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1);
+    opacity: 0;
+  }
+}
+.word-out { animation: word-out 9s linear infinite; }
+
 /* end 버튼 hover — 가운데서 동심원이 천천히 그려짐(대기 시 안 보임) */
 @keyframes end-ripple {
   0% { transform: translate(-50%, -50%) scale(0.15); opacity: 0.5; }
@@ -176,7 +195,8 @@ html {
 /* 모션 최소화를 원하는 사용자는 애니메이션을 끈다 */
 @media (prefers-reduced-motion: reduce) {
   .rise-float, .rise-wiggle, .rise-blink, .rise-pop,
-  .animate-slow-spin, .revolve, .counter-revolve, .end-ripple { animation: none; }
+  .animate-slow-spin, .revolve, .counter-revolve, .end-ripple,
+  .ring-out, .word-out { animation: none; }
 }
 
 body {

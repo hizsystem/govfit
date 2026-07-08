@@ -1972,7 +1972,14 @@ const PF_COMPANIES = [
   },
   { name: "weetamin", img: "/portfolio/weetamin.jpg", from: "#e2e6ff", to: "#b8c0fb" },
 ];
-const PF_SLIDES = [...PF_COMPANIES, ...PF_COMPANIES, ...PF_COMPANIES];
+// 무한 루프용으로 넉넉히 반복 (경계에서 3칸씩 순간 점프 → 내용이 반복이라 안 보임)
+const PF_SLIDES = [
+  ...PF_COMPANIES,
+  ...PF_COMPANIES,
+  ...PF_COMPANIES,
+  ...PF_COMPANIES,
+  ...PF_COMPANIES,
+];
 /** 유튜브(땡스 큐레이터) 최근 영상 + 채널 */
 const YT_VIDEOS = ["rM6gwEyfKZ8", "VY3vXUfKMEI", "8DXShoYTbeA", "s04NYW3nOxA"];
 const YT_CHANNEL =
@@ -1997,16 +2004,38 @@ const WHAT_LIST = [
   },
 ];
 
+// 메인 비주얼에서 바깥으로 퍼지는 단어들 (방향 tx/ty[vmin] + 시작 지연[s])
+const HERO_WORDS = [
+  { label: "branding", tx: "-34vmin", ty: "-28vmin", delay: 0 },
+  { label: "marketing", tx: "37vmin", ty: "-20vmin", delay: 1.5 },
+  { label: "branding", tx: "42vmin", ty: "20vmin", delay: 3 },
+  { label: "marketing", tx: "-40vmin", ty: "26vmin", delay: 4.5 },
+  { label: "marketing", tx: "-8vmin", ty: "-44vmin", delay: 6 },
+  { label: "branding", tx: "16vmin", ty: "42vmin", delay: 7.5 },
+];
+
 function HomeV2() {
   // 포트폴리오 슬라이더 (데스크톱 3개 / 모바일 1개 중앙 + 좌우 미리보기)
-  const [pfPos, setPfPos] = useState(0);
+  // 무한 정방향 루프: pfPos는 6 근처에서 오가고, 3/9 경계에 닿으면 ±3 순간 점프
+  const [pfPos, setPfPos] = useState(6);
+  const [pfAnim, setPfAnim] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const pfMax = PF_SLIDES.length - 3; // 6
-  const movePf = (d: number) =>
-    setPfPos((p) => {
-      const n = p + d;
-      return n < 0 ? pfMax : n > pfMax ? 0 : n;
-    });
+  const movePf = (d: number) => setPfPos((p) => p + d);
+  const pfEnd = () => {
+    if (pfPos >= 9) {
+      setPfAnim(false);
+      setPfPos(pfPos - 3);
+    } else if (pfPos <= 3) {
+      setPfAnim(false);
+      setPfPos(pfPos + 3);
+    }
+  };
+  useEffect(() => {
+    if (!pfAnim) {
+      const t = setTimeout(() => setPfAnim(true), 30);
+      return () => clearTimeout(t);
+    }
+  }, [pfAnim]);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -2049,29 +2078,37 @@ function HomeV2() {
             "radial-gradient(ellipse at center, #ffffff 55%, #d2dcf5 100%)",
         }}
       >
-        <ConcentricCircles />
+        {/* 가운데서 바깥으로 퍼지며 사라지는 동심원 (무한) */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="ring-out absolute left-1/2 top-1/2 h-[170vmin] w-[170vmin] rounded-full"
+              style={{
+                border: `1px ${i % 2 ? "dashed" : "solid"} var(--color-brand)`,
+                animationDelay: `${i * 1.8}s`,
+              }}
+            />
+          ))}
+        </div>
 
-        {/* 공전하는 단어들 (자전 없음) — 나중에 기업 로고로 교체 예정 */}
-        <div
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          aria-hidden
-        >
-          <div className="revolve absolute left-1/2 top-1/2 h-[90vmin] w-[90vmin] -translate-x-1/2 -translate-y-1/2">
-            <span className="counter-revolve absolute left-1/2 top-0 -translate-x-1/2 text-xs font-semibold text-muted sm:text-sm">
-              branding
+        {/* 동심원 따라 바깥으로 퍼지는 단어들 (무한) — 추후 기업 로고로 교체 예정 */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          {HERO_WORDS.map((w, i) => (
+            <span
+              key={i}
+              className="word-out absolute left-1/2 top-1/2 text-sm font-semibold text-muted sm:text-base"
+              style={
+                {
+                  "--tx": w.tx,
+                  "--ty": w.ty,
+                  animationDelay: `${w.delay}s`,
+                } as React.CSSProperties
+              }
+            >
+              {w.label}
             </span>
-            <span className="counter-revolve absolute bottom-0 left-1/2 -translate-x-1/2 text-xs font-semibold text-muted sm:text-sm">
-              marketing
-            </span>
-          </div>
-          <div className="revolve absolute left-1/2 top-1/2 h-[148vmin] w-[148vmin] -translate-x-1/2 -translate-y-1/2">
-            <span className="counter-revolve absolute left-0 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted/70 sm:text-base">
-              marketing
-            </span>
-            <span className="counter-revolve absolute right-0 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted/70 sm:text-base">
-              branding
-            </span>
-          </div>
+          ))}
         </div>
 
         {/* 중앙 카피 */}
@@ -2091,8 +2128,13 @@ function HomeV2() {
       <section className="relative overflow-hidden bg-paper">
         <div className="overflow-hidden">
           <div
-            className="flex transition-transform duration-500 ease-out"
+            className={`flex ${
+              pfAnim ? "transition-transform duration-500 ease-out" : ""
+            }`}
             style={{ transform: `translateX(${pfTx}%)` }}
+            onTransitionEnd={(e) => {
+              if (e.propertyName === "transform") pfEnd();
+            }}
           >
             {PF_SLIDES.map((c, i) => (
               <div
@@ -2167,7 +2209,7 @@ function HomeV2() {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-b from-transparent to-white"
           aria-hidden
         />
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 pb-72 pt-24 sm:px-10 md:grid-cols-2 md:pt-28">
+        <div className="relative mx-auto grid max-w-5xl justify-center gap-10 px-6 pb-72 pt-24 sm:px-10 md:grid-cols-2 md:pt-28">
           <div>
             <p className="text-xl font-normal text-white sm:text-2xl">
               어떻게 성장할지{" "}
@@ -2286,7 +2328,7 @@ function HomeV2() {
             className="mt-2 text-3xl font-medium sm:text-5xl"
             style={{
               color: "transparent",
-              backgroundImage: `linear-gradient(to right, #FAFAFA ${blueFill - 18}%, rgba(250,250,250,0.5) ${blueFill + 18}%)`,
+              backgroundImage: `linear-gradient(to right, #FAFAFA ${blueFill}%, rgba(250,250,250,0.5) ${blueFill}%)`,
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
             }}
@@ -2298,7 +2340,7 @@ function HomeV2() {
 
       {/* 8. YOUTUBE — 땡스 큐레이터 최근 영상 4개 연동 */}
       <section className="bg-mist">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-16 sm:px-10 sm:py-24 md:grid-cols-[minmax(0,400px)_1fr]">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 sm:px-10 sm:py-24 md:grid-cols-[minmax(0,380px)_minmax(0,720px)]">
           <div>
             <p className="text-lg text-navy sm:text-xl">
               브랜드라이즈에서 운영하는
