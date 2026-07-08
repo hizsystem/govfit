@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   CATEGORIES,
   INDUSTRIES,
@@ -361,7 +361,9 @@ export default function Home() {
     <>
       <nav
         className={`sticky top-0 z-50 transition-colors duration-300 ${
-          scrolled ? "bg-brand/70 backdrop-blur-md" : "bg-brand"
+          scrolled
+            ? "border-b border-white/25 backdrop-blur-md"
+            : "bg-brand"
         }`}
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
@@ -391,14 +393,14 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-full bg-white px-4 py-2 text-sm font-bold text-brand transition hover:bg-white/90"
+                className="rounded-2xl bg-white px-4 py-2 text-sm font-bold text-brand transition hover:bg-white/90"
               >
                 무료상담
               </button>
               {/* 로그인: hover 시 흰색 채움 + 글자 하이라이트 블루 */}
               <button
                 type="button"
-                className="rounded-full border border-white/70 px-4 py-2 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
+                className="rounded-2xl border border-white/70 px-4 py-2 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
               >
                 로그인
               </button>
@@ -453,13 +455,13 @@ export default function Home() {
             <div className="mt-2 flex gap-2">
               <button
                 type="button"
-                className="flex-1 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-brand"
+                className="flex-1 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-brand"
               >
                 무료상담
               </button>
               <button
                 type="button"
-                className="flex-1 rounded-full border border-white/70 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
+                className="flex-1 rounded-2xl border border-white/70 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
               >
                 로그인
               </button>
@@ -2000,6 +2002,25 @@ function HomeV2() {
   // 데스크톱: 3개(pfPos부터) 노출
   const pfTx = isMobile ? 10 - (pfPos + 1) * 80 : -(pfPos * (100 / 3));
 
+  // blue 섹션 문구 — 스크롤에 따라 #FAFAFA가 왼→오로 차오름 (기본 50%)
+  const blueRef = useRef<HTMLParagraphElement>(null);
+  const [blueFill, setBlueFill] = useState(0);
+  useEffect(() => {
+    const onScroll = () => {
+      const el = blueRef.current;
+      if (!el) return;
+      const vh = window.innerHeight;
+      const rect = el.getBoundingClientRect();
+      const start = vh * 0.85; // 화면 아래에서 진입할 때 0%
+      const end = vh * 0.35; // 위로 올라오면 100%
+      const p = ((start - rect.top) / (start - end)) * 100;
+      setBlueFill(Math.max(0, Math.min(100, p)));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <>
       {/* 2. MAIN VISUAL — 방사형 그라데이션(#FFF 55% → #E5ECFB) + 동심원 + 공전 */}
@@ -2007,7 +2028,7 @@ function HomeV2() {
         className="relative flex min-h-[86vh] items-center justify-center overflow-hidden"
         style={{
           background:
-            "radial-gradient(ellipse at center, #ffffff 55%, #e5ecfb 100%)",
+            "radial-gradient(ellipse at center, #ffffff 55%, #d2dcf5 100%)",
         }}
       >
         <ConcentricCircles />
@@ -2207,7 +2228,7 @@ function HomeV2() {
               </div>
               <button
                 type="button"
-                className="mt-6 rounded-full border border-brand py-3 text-sm font-semibold text-brand transition hover:bg-brand hover:text-[#FAFAFA]"
+                className="mt-6 rounded-2xl border border-brand py-3 text-sm font-semibold text-brand transition hover:bg-brand hover:text-[#FAFAFA]"
               >
                 {w.cta}
               </button>
@@ -2222,23 +2243,31 @@ function HomeV2() {
           <p className="text-2xl font-semibold tracking-wide sm:text-3xl">
             Where Brand Rise<span className="text-accent">.</span>
           </p>
-          <p className="mt-2 text-3xl font-normal sm:text-5xl">
-            좋은 기업이 <span className="font-semibold">더 좋은 기회</span>를 만나는
-            곳.
+          <p
+            ref={blueRef}
+            className="mt-2 text-3xl font-medium sm:text-5xl"
+            style={{
+              color: "transparent",
+              backgroundImage: `linear-gradient(to right, #FAFAFA ${blueFill}%, rgba(250,250,250,0.5) ${Math.min(100, blueFill + 6)}%)`,
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+            }}
+          >
+            좋은 기업이 <span className="font-bold">더 좋은 기회</span>를 만나는 곳.
           </p>
         </div>
       </section>
 
       {/* 8. YOUTUBE — 땡스 큐레이터 최근 영상 4개 연동 */}
       <section className="bg-mist">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 sm:px-10 sm:py-24 md:grid-cols-2">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-16 sm:px-10 sm:py-24 md:grid-cols-[minmax(0,400px)_1fr]">
           <div>
             <p className="text-lg text-navy sm:text-xl">
               브랜드라이즈에서 운영하는
               <br />
               <span className="font-semibold">유튜브 채널</span>
             </p>
-            <h2 className="mt-2 text-4xl font-bold text-navy sm:text-5xl">
+            <h2 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">
               땡스 큐레이터<span className="text-accent">.</span>
             </h2>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-navy sm:text-base">
@@ -2288,12 +2317,15 @@ function HomeV2() {
           </p>
           <button
             type="button"
-            className="group relative mt-8 overflow-hidden rounded-full bg-brand px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:shadow-xl"
+            className="group relative mt-8 overflow-hidden rounded-2xl bg-brand px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:shadow-xl"
           >
             <span className="relative z-10">무료상담 신청하기</span>
-            {/* hover 시 버튼 가운데서 그려지는 동심원 */}
-            <span className="pointer-events-none absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 transition-all duration-700 group-hover:h-40 group-hover:w-40 group-hover:opacity-0" />
-            <span className="pointer-events-none absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 transition-all delay-100 duration-700 group-hover:h-64 group-hover:w-64 group-hover:opacity-0" />
+            {/* hover 시 가운데서 천천히 그려지는 동심원 (대기 시엔 안 보임) */}
+            <span className="end-ripple pointer-events-none absolute left-1/2 top-1/2 h-44 w-44 rounded-full border border-white/60 opacity-0" />
+            <span
+              className="end-ripple pointer-events-none absolute left-1/2 top-1/2 h-44 w-44 rounded-full border border-white/45 opacity-0"
+              style={{ animationDelay: "0.35s" }}
+            />
           </button>
         </div>
       </section>
