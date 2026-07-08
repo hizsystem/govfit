@@ -185,6 +185,13 @@ html {
 }
 .word-out { animation: word-out 14s linear infinite backwards; }
 
+/* 메인 비주얼 하단 스크롤 유도 — 은은하게 위아래로 반복 */
+@keyframes scroll-hint {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
+  50% { transform: translate(-50%, 6px); opacity: 1; }
+}
+.scroll-hint { animation: scroll-hint 1.8s ease-in-out infinite; }
+
 /* end 버튼 hover — 가운데서 동심원이 천천히 그려짐(대기 시 안 보임) */
 @keyframes end-ripple {
   0% { transform: translate(-50%, -50%) scale(0.15); opacity: 0.5; }
@@ -196,7 +203,7 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .rise-float, .rise-wiggle, .rise-blink, .rise-pop,
   .animate-slow-spin, .revolve, .counter-revolve, .end-ripple,
-  .ring-out, .word-out { animation: none; }
+  .ring-out, .word-out, .scroll-hint { animation: none; }
 }
 
 body {

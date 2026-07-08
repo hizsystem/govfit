@@ -382,7 +382,7 @@ export default function Home() {
           {/* 데스크톱 메뉴 (버튼 연결은 추후) */}
           <div className="hidden items-center gap-8 md:flex">
             <div
-              className={`flex items-center gap-8 text-base font-medium ${
+              className={`flex items-center gap-12 text-base font-medium ${
                 scrolled ? "text-brand" : "text-white"
               }`}
             >
@@ -1008,26 +1008,19 @@ function FloatingContact() {
           aria-expanded={open}
           className="grid h-14 w-14 place-items-center rounded-full bg-brand text-white shadow-xl transition hover:scale-105"
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-7 w-7"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            {open ? (
-              <>
-                <line x1="7" y1="7" x2="17" y2="17" />
-                <line x1="7" y1="17" x2="17" y2="7" />
-              </>
-            ) : (
-              <>
-                <line x1="7" y1="10" x2="17" y2="10" />
-                <line x1="7" y1="14" x2="17" y2="14" />
-              </>
-            )}
-          </svg>
+          {/* 두 개의 막대가 회전하며 = ↔ ✕ 로 부드럽게 변형 */}
+          <span className="relative block h-6 w-6" aria-hidden>
+            <span
+              className={`absolute inset-0 m-auto h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-in-out ${
+                open ? "rotate-45" : "-translate-y-1"
+              }`}
+            />
+            <span
+              className={`absolute inset-0 m-auto h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ease-in-out ${
+                open ? "-rotate-45" : "translate-y-1"
+              }`}
+            />
+          </span>
         </button>
       </div>
 
@@ -2160,6 +2153,22 @@ function HomeV2() {
             곳
           </p>
         </div>
+
+        {/* 스크롤 유도 — 아래로 내려보라는 안내 (은은하게 위아래로 움직임) */}
+        <div className="scroll-hint pointer-events-none absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-navy/60">
+          <svg
+            viewBox="0 0 24 24"
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+          <span className="text-sm font-medium tracking-wide">Scroll</span>
+        </div>
       </section>
 
       {/* 3. PORTFOLIO — 3개씩 노출되는 슬라이드(현재 3×3), 양옆 화살표 */}
@@ -2204,7 +2213,7 @@ function HomeV2() {
         >
           <svg
             viewBox="0 0 24 24"
-            className="h-9 w-9 drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11"
+            className="h-12 w-12 drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] sm:h-16 sm:w-16"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
@@ -2222,7 +2231,7 @@ function HomeV2() {
         >
           <svg
             viewBox="0 0 24 24"
-            className="h-9 w-9 drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11"
+            className="h-12 w-12 drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] sm:h-16 sm:w-16"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
@@ -2247,7 +2256,7 @@ function HomeV2() {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-b from-transparent to-white"
           aria-hidden
         />
-        <div className="relative mx-auto flex max-w-5xl flex-col gap-10 px-6 pb-72 pt-24 sm:px-10 md:flex-row md:items-start md:justify-center md:gap-20 md:pt-28">
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-72 pt-24 sm:px-10 md:flex-row md:items-start md:justify-center md:gap-36 md:pt-28">
           <div>
             <p className="text-xl font-normal text-white sm:text-2xl">
               어떻게 성장할지{" "}
