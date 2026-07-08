@@ -2007,11 +2007,11 @@ const WHAT_LIST = [
 // 메인 비주얼에서 바깥으로 퍼지는 단어들 (방향 tx/ty[vmin] + 시작 지연[s])
 const HERO_WORDS = [
   { label: "branding", tx: "-34vmin", ty: "-28vmin", delay: 0 },
-  { label: "marketing", tx: "37vmin", ty: "-20vmin", delay: 1.5 },
-  { label: "branding", tx: "42vmin", ty: "20vmin", delay: 3 },
-  { label: "marketing", tx: "-40vmin", ty: "26vmin", delay: 4.5 },
-  { label: "marketing", tx: "-8vmin", ty: "-44vmin", delay: 6 },
-  { label: "branding", tx: "16vmin", ty: "42vmin", delay: 7.5 },
+  { label: "marketing", tx: "37vmin", ty: "-20vmin", delay: 2.3 },
+  { label: "branding", tx: "42vmin", ty: "20vmin", delay: 4.6 },
+  { label: "marketing", tx: "-40vmin", ty: "26vmin", delay: 7 },
+  { label: "marketing", tx: "-8vmin", ty: "-44vmin", delay: 9.3 },
+  { label: "branding", tx: "16vmin", ty: "42vmin", delay: 11.6 },
 ];
 
 function HomeV2() {
@@ -2086,7 +2086,7 @@ function HomeV2() {
               className="ring-out absolute left-1/2 top-1/2 h-[170vmin] w-[170vmin] rounded-full"
               style={{
                 border: `1px ${i % 2 ? "dashed" : "solid"} var(--color-brand)`,
-                animationDelay: `${i * 1.8}s`,
+                animationDelay: `${i * 2.8}s`,
               }}
             />
           ))}
@@ -2209,7 +2209,7 @@ function HomeV2() {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-b from-transparent to-white"
           aria-hidden
         />
-        <div className="relative mx-auto grid max-w-5xl justify-center gap-10 px-6 pb-72 pt-24 sm:px-10 md:grid-cols-2 md:pt-28">
+        <div className="relative mx-auto flex max-w-5xl flex-col gap-10 px-6 pb-72 pt-24 sm:px-10 md:flex-row md:items-start md:justify-center md:gap-20 md:pt-28">
           <div>
             <p className="text-xl font-normal text-white sm:text-2xl">
               어떻게 성장할지{" "}
@@ -2326,16 +2326,15 @@ function HomeV2() {
           </p>
           <p
             ref={blueRef}
-            className="mt-2 text-3xl font-medium sm:text-5xl"
+            className="mt-2 text-3xl font-bold sm:text-5xl"
             style={{
               color: "transparent",
-              backgroundImage: `linear-gradient(to right, #FAFAFA ${blueFill}%, rgba(250,250,250,0.5) ${blueFill}%)`,
+              backgroundImage: `linear-gradient(to right, #FAFAFA ${blueFill}%, rgba(250,250,250,0.4) ${blueFill}%)`,
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
             }}
           >
-            좋은 기업이 <br className="sm:hidden" />
-            <span className="font-bold">더 좋은 기회</span>를 만나는 곳.
+            좋은 기업이 <br className="sm:hidden" />더 좋은 기회를 만나는 곳.
           </p>
         </div>
       </section>
