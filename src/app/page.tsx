@@ -362,7 +362,7 @@ export default function Home() {
       <nav
         className={`sticky top-0 z-50 transition-colors duration-300 ${
           scrolled
-            ? "border-b border-white/25 backdrop-blur-md"
+            ? "border-b border-black/5 backdrop-blur-md"
             : "bg-brand"
         }`}
       >
@@ -371,7 +371,9 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setView("intro")}
-            className="text-xl font-bold tracking-tight text-white"
+            className={`text-xl font-bold tracking-tight ${
+              scrolled ? "text-brand" : "text-white"
+            }`}
             aria-label="Brand Rise 홈"
           >
             Brand Rise<span className="text-accent">.</span>
@@ -379,28 +381,40 @@ export default function Home() {
 
           {/* 데스크톱 메뉴 (버튼 연결은 추후) */}
           <div className="hidden items-center gap-8 md:flex">
-            <div className="flex items-center gap-8 text-base font-medium text-white">
-              <button type="button" className="transition hover:text-white">
+            <div
+              className={`flex items-center gap-8 text-base font-medium ${
+                scrolled ? "text-brand" : "text-white"
+              }`}
+            >
+              <button type="button" className="transition hover:opacity-60">
                 지원사업 찾기
               </button>
-              <button type="button" className="transition hover:text-white">
+              <button type="button" className="transition hover:opacity-60">
                 서비스 문의
               </button>
-              <button type="button" className="transition hover:text-white">
+              <button type="button" className="transition hover:opacity-60">
                 무료상담
               </button>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-2xl bg-white px-4 py-2 text-sm font-bold text-brand transition hover:bg-white/90"
+                className={`rounded-2xl px-4 py-2 text-sm font-bold transition ${
+                  scrolled
+                    ? "bg-brand text-white hover:bg-brand/90"
+                    : "bg-white text-brand hover:bg-white/90"
+                }`}
               >
                 무료상담
               </button>
-              {/* 로그인: hover 시 흰색 채움 + 글자 하이라이트 블루 */}
+              {/* 로그인: hover 시 채움 반전 */}
               <button
                 type="button"
-                className="rounded-2xl border border-white/70 px-4 py-2 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
+                className={`rounded-2xl border px-4 py-2 text-sm font-bold transition ${
+                  scrolled
+                    ? "border-brand text-brand hover:bg-brand hover:text-white"
+                    : "border-white/70 text-white hover:bg-white hover:text-brand"
+                }`}
               >
                 로그인
               </button>
@@ -413,7 +427,11 @@ export default function Home() {
             onClick={() => setMobileMenuOpen((o) => !o)}
             aria-label="메뉴"
             aria-expanded={mobileMenuOpen}
-            className="grid h-10 w-10 place-items-center rounded-lg text-white transition hover:bg-white/10 md:hidden"
+            className={`grid h-10 w-10 place-items-center rounded-lg transition md:hidden ${
+              scrolled
+                ? "text-brand hover:bg-brand/10"
+                : "text-white hover:bg-white/10"
+            }`}
           >
             <svg
               viewBox="0 0 24 24"
@@ -2011,8 +2029,8 @@ function HomeV2() {
       if (!el) return;
       const vh = window.innerHeight;
       const rect = el.getBoundingClientRect();
-      const start = vh * 0.85; // 화면 아래에서 진입할 때 0%
-      const end = vh * 0.35; // 위로 올라오면 100%
+      const start = vh * 0.6; // 하단에서 40% 위치(=상단 60%)에서 차오르기 시작
+      const end = vh * 0.2; // 더 올라오면 100%
       const p = ((start - rect.top) / (start - end)) * 100;
       setBlueFill(Math.max(0, Math.min(100, p)));
     };
@@ -2102,17 +2120,37 @@ function HomeV2() {
           type="button"
           onClick={() => movePf(-1)}
           aria-label="이전 포트폴리오"
-          className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-2xl text-navy shadow-md transition hover:bg-white sm:left-6"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-white transition hover:opacity-70 sm:left-10"
         >
-          ‹
+          <svg
+            viewBox="0 0 24 24"
+            className="h-9 w-9 drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
         </button>
         <button
           type="button"
           onClick={() => movePf(1)}
           aria-label="다음 포트폴리오"
-          className="absolute right-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-2xl text-navy shadow-md transition hover:bg-white sm:right-6"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-white transition hover:opacity-70 sm:right-10"
         >
-          ›
+          <svg
+            viewBox="0 0 24 24"
+            className="h-9 w-9 drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] sm:h-11 sm:w-11"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </section>
 
@@ -2248,7 +2286,7 @@ function HomeV2() {
             className="mt-2 text-3xl font-medium sm:text-5xl"
             style={{
               color: "transparent",
-              backgroundImage: `linear-gradient(to right, #FAFAFA ${blueFill}%, rgba(250,250,250,0.5) ${Math.min(100, blueFill + 6)}%)`,
+              backgroundImage: `linear-gradient(to right, #FAFAFA ${blueFill - 18}%, rgba(250,250,250,0.5) ${blueFill + 18}%)`,
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
             }}
