@@ -2002,8 +2002,14 @@ function HomeV2() {
 
   return (
     <>
-      {/* 2. MAIN VISUAL — 동심원 배경 + branding/marketing 공전 */}
-      <section className="relative flex min-h-[86vh] items-center justify-center overflow-hidden bg-gradient-to-b from-mist/60 via-paper to-paper">
+      {/* 2. MAIN VISUAL — 방사형 그라데이션(#FFF 55% → #E5ECFB) + 동심원 + 공전 */}
+      <section
+        className="relative flex min-h-[86vh] items-center justify-center overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, #ffffff 55%, #e5ecfb 100%)",
+        }}
+      >
         <ConcentricCircles />
 
         {/* 공전하는 단어들 (자전 없음) — 나중에 기업 로고로 교체 예정 */}
