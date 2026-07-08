@@ -1,101 +1,107 @@
 @import "tailwindcss";
 
 :root {
-  /* 따뜻한 오프화이트 배경 / 웜한 본문색 */
-  --background: #faf7f2;
-  --foreground: #1c1917;
+  --background: #fdfdfd;
+  --foreground: #3d476d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Brand Rise 컬러 시스템 (따뜻한 리브랜딩)
-
-   ▸ 하이라이트(주황)를 바꾸고 싶으면 아래 `blue` 램프의 600 값만 고치세요.
-     코드 전반은 blue/indigo/violet/gray 클래스를 쓰고 있어서,
-     이 한 곳에서 색을 재정의하면 사이트 전체가 함께 바뀝니다.
-
-   blue   → 브랜드 주황(하이라이트, 버튼·강조)
-   indigo → 약간 노란 골드(주황 인접색, 그라데이션 파트너)
-   violet → 따뜻한 코랄(히어로 그라데이션 마무리색)
-   gray   → 웜그레이(stone) — 전체 중립색을 따뜻하게
+   Brand Rise v2 컬러 (지정 팔레트)
+   brand #3E47FF · accent #FF5D3C · navy #3D476D · mist #F1F3FA
+   muted #ADADAD · paper #FDFDFD · periwinkle #C8CBFB (그라데이션용)
+   → 시맨틱 토큰으로 bg-brand / text-accent / bg-navy 등 사용
    ─────────────────────────────────────────────────────────────── */
 @theme {
-  /* 하이라이트 = 브랜드 주황 (로고 심볼 색) */
-  --color-blue-50:  #fff6ec;
-  --color-blue-100: #ffe9d2;
-  --color-blue-200: #ffd3a6;
-  --color-blue-300: #fdb773;
-  --color-blue-400: #fa9f44;
-  --color-blue-500: #fa9f2c;
-  --color-blue-600: #f7941e; /* ← 브랜드 하이라이트 (여기를 바꾸면 전체 변경) */
-  --color-blue-700: #e07e0e;
-  --color-blue-800: #b26211;
-  --color-blue-900: #8e4f13;
-  --color-blue-950: #4c2706;
+  --color-brand: #3e47ff;
+  --color-brand-soft: #c8cbfb;
+  --color-accent: #ff5d3c;
+  --color-navy: #3d476d;
+  --color-mist: #f1f3fa;
+  --color-muted: #adadad;
+  --color-paper: #fdfdfd;
+  --color-periwinkle: #c8cbfb;
+}
 
-  /* 그라데이션 파트너 = 주황보다 살짝 노란 골드 */
-  --color-indigo-50:  #fff8e8;
-  --color-indigo-100: #fdefc4;
-  --color-indigo-200: #fbdd88;
-  --color-indigo-300: #f8c84b;
-  --color-indigo-400: #f6b524;
-  --color-indigo-500: #f7a915;
-  --color-indigo-600: #f8af1e; /* 그라데이션 to- (주황 옆 골드) */
-  --color-indigo-700: #d6850a;
-  --color-indigo-800: #b0700f;
-  --color-indigo-900: #8d5912;
-  --color-indigo-950: #4b2d06;
+/* ───────────────────────────────────────────────────────────────
+   앱 전역 색을 브랜드 블루(#3E47FF) / 쿨 뉴트럴로 통일.
+   홈은 위의 시맨틱 토큰(bg-brand 등)을 쓰고, 그 외 화면의
+   blue/indigo/violet/gray 클래스는 아래 값으로 렌더된다.
+   ─────────────────────────────────────────────────────────────── */
+@theme {
+  /* 하이라이트 = 브랜드 블루 #3E47FF */
+  --color-blue-50:  #eef0ff;
+  --color-blue-100: #dfe1ff;
+  --color-blue-200: #c8cbfb;
+  --color-blue-300: #a1a6ff;
+  --color-blue-400: #7178ff;
+  --color-blue-500: #4f57ff;
+  --color-blue-600: #3e47ff;
+  --color-blue-700: #2f37e6;
+  --color-blue-800: #262cb8;
+  --color-blue-900: #232a8f;
+  --color-blue-950: #161a54;
 
-  /* 히어로 마무리색 = 따뜻한 코랄 */
-  --color-violet-50:  #fff3ee;
-  --color-violet-100: #ffe2d6;
-  --color-violet-200: #ffc3ac;
-  --color-violet-300: #fca98a;
-  --color-violet-400: #f4855b;
-  --color-violet-500: #ee6c3a;
-  --color-violet-600: #e2541f;
-  --color-violet-700: #bc4116;
-  --color-violet-800: #963518;
-  --color-violet-900: #792f18;
-  --color-violet-950: #41140a;
+  --color-indigo-50:  #eef0ff;
+  --color-indigo-100: #dfe1ff;
+  --color-indigo-200: #c8cbfb;
+  --color-indigo-300: #a1a6ff;
+  --color-indigo-400: #7178ff;
+  --color-indigo-500: #4f57ff;
+  --color-indigo-600: #3e47ff;
+  --color-indigo-700: #2f37e6;
+  --color-indigo-800: #262cb8;
+  --color-indigo-900: #232a8f;
+  --color-indigo-950: #161a54;
 
-  /* 중립색 = 웜그레이(stone) — 사이트 전반을 따뜻하게 */
-  --color-gray-50:  #fafaf9;
-  --color-gray-100: #f5f5f4;
-  --color-gray-200: #e7e5e4;
-  --color-gray-300: #d6d3d1;
-  --color-gray-400: #a8a29e;
-  --color-gray-500: #78716c;
-  --color-gray-600: #57534e;
-  --color-gray-700: #44403c;
-  --color-gray-800: #292524;
-  --color-gray-900: #1c1917;
-  --color-gray-950: #0c0a09;
+  --color-violet-50:  #eef0ff;
+  --color-violet-100: #dfe1ff;
+  --color-violet-200: #c8cbfb;
+  --color-violet-300: #a1a6ff;
+  --color-violet-400: #7178ff;
+  --color-violet-500: #4f57ff;
+  --color-violet-600: #3e47ff;
+  --color-violet-700: #2f37e6;
+  --color-violet-800: #262cb8;
+  --color-violet-900: #232a8f;
+  --color-violet-950: #161a54;
 
-  /* slate(소량 사용)도 웜그레이로 통일 */
-  --color-slate-50:  #fafaf9;
-  --color-slate-100: #f5f5f4;
-  --color-slate-200: #e7e5e4;
-  --color-slate-300: #d6d3d1;
-  --color-slate-400: #a8a29e;
-  --color-slate-500: #78716c;
-  --color-slate-600: #57534e;
-  --color-slate-700: #44403c;
-  --color-slate-800: #292524;
-  --color-slate-900: #1c1917;
-  --color-slate-950: #0c0a09;
+  /* 중립 = 쿨 뉴트럴 (mist #F1F3FA / muted #ADADAD 계열) */
+  --color-gray-50:  #f8f9fc;
+  --color-gray-100: #f1f3fa;
+  --color-gray-200: #e6e8f1;
+  --color-gray-300: #d3d6e1;
+  --color-gray-400: #adadad;
+  --color-gray-500: #8a8f9e;
+  --color-gray-600: #5f6474;
+  --color-gray-700: #454a5c;
+  --color-gray-800: #2e3242;
+  --color-gray-900: #1e2230;
+  --color-gray-950: #12141d;
+
+  --color-slate-50:  #f8f9fc;
+  --color-slate-100: #f1f3fa;
+  --color-slate-200: #e6e8f1;
+  --color-slate-300: #d3d6e1;
+  --color-slate-400: #adadad;
+  --color-slate-500: #8a8f9e;
+  --color-slate-600: #5f6474;
+  --color-slate-700: #454a5c;
+  --color-slate-800: #2e3242;
+  --color-slate-900: #1e2230;
+  --color-slate-950: #12141d;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1a1714;
-    --foreground: #f5f0e8;
+    --background: #12141d;
+    --foreground: #e6e8f1;
   }
 }
 
@@ -153,16 +159,58 @@ html {
 }
 .animate-toast { animation: toast-in-out 2s ease-in-out forwards; }
 
+/* 메인 비주얼 — 단어가 동심원을 따라 공전(자전 X).
+   링(.revolve)이 천천히 돌고, 단어(.counter-revolve)는 반대로 돌아 항상 수평 유지 */
+@keyframes revolve { to { transform: rotate(360deg); } }
+@keyframes counter-revolve { to { transform: rotate(-360deg); } }
+.revolve { animation: revolve 90s linear infinite; }
+.counter-revolve { animation: counter-revolve 90s linear infinite; }
+
+/* 메인 비주얼 — 동심원이 가운데서 바깥으로 퍼지며 점점 연해져 사라짐(무한) */
+@keyframes ring-out {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  15% { opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.ring-out { animation: ring-out 14s linear infinite backwards; }
+
+/* 단어(branding/marketing)가 동심원 따라 바깥으로 이동하며 사라짐(무한) */
+@keyframes word-out {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  18% { opacity: 0.5; }
+  100% {
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1);
+    opacity: 0;
+  }
+}
+.word-out { animation: word-out 14s linear infinite backwards; }
+
+/* 메인 비주얼 하단 스크롤 유도 — 은은하게 위아래로 반복 */
+@keyframes scroll-hint {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
+  50% { transform: translate(-50%, 6px); opacity: 1; }
+}
+.scroll-hint { animation: scroll-hint 1.8s ease-in-out infinite; }
+
+/* end 버튼 hover — 가운데서 동심원이 천천히 그려짐(대기 시 안 보임) */
+@keyframes end-ripple {
+  0% { transform: translate(-50%, -50%) scale(0.15); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.group:hover .end-ripple { animation: end-ripple 1.8s ease-out; }
+
 /* 모션 최소화를 원하는 사용자는 애니메이션을 끈다 */
 @media (prefers-reduced-motion: reduce) {
-  .rise-float, .rise-wiggle, .rise-blink, .rise-pop, .animate-slow-spin { animation: none; }
+  .rise-float, .rise-wiggle, .rise-blink, .rise-pop,
+  .animate-slow-spin, .revolve, .counter-revolve, .end-ripple,
+  .ring-out, .word-out, .scroll-hint { animation: none; }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, "Apple SD Gothic Neo",
-    "Malgun Gothic", "맑은 고딕", sans-serif;
+  font-family: var(--font-inter), -apple-system, "Apple SD Gothic Neo",
+    "Pretendard", "Malgun Gothic", "맑은 고딕", sans-serif;
   /* full-bleed 요소가 스크롤바 폭만큼 넘치는 것을 잘라낸다.
      (clip은 hidden과 달리 sticky 네비를 깨지 않는다) */
   overflow-x: clip;
