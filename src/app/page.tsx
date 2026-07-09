@@ -125,6 +125,28 @@ export default function Home() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // 브라우저 뒤로/앞으로 가기 지원 — nav로 이동한 화면(예: 지원사업 찾기)에서
+  // 뒤로가기를 누르면 history에 저장된 view로 되돌아간다(기본값: 홈=intro).
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const v = (e.state && (e.state as { view?: string }).view) || "intro";
+      setView(v as typeof view);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // nav에서 '지원사업 찾기'로 이동 — history 기록을 남겨 뒤로가기로 홈 복귀 가능
+  const goSearch = () => {
+    window.history.pushState({ view: "search" }, "", "?view=search");
+    setView("search");
+  };
+  // 로고 클릭 등으로 홈(대문)으로 돌아갈 때도 주소를 초기화
+  const goHome = () => {
+    window.history.pushState({ view: "intro" }, "", "/");
+    setView("intro");
+  };
   // 로그인 필수 기능인데 미로그인이면 게이트 표시
   const needsLogin =
     auth.configured && !auth.user && (view === "saved" || view === "mypage");
@@ -372,7 +394,7 @@ export default function Home() {
           {/* 로고 */}
           <button
             type="button"
-            onClick={() => setView("intro")}
+            onClick={goHome}
             className={`text-xl font-bold tracking-tight ${
               scrolled ? "text-brand" : "text-white"
             }`}
@@ -390,7 +412,7 @@ export default function Home() {
             >
               <button
                 type="button"
-                onClick={() => setView("search")}
+                onClick={goSearch}
                 className="transition hover:opacity-60"
               >
                 지원사업 찾기
@@ -479,7 +501,7 @@ export default function Home() {
                 type="button"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  if (label === "지원사업 찾기") setView("search");
+                  if (label === "지원사업 찾기") goSearch();
                   if (label === "무료상담")
                     window.open(CONSULT_URL, "_blank", "noopener");
                 }}
