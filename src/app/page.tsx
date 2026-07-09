@@ -49,6 +49,8 @@ const CONTACT_EMAIL = "yeji_lee@hizpeople.com";
 /** 고객지원·서비스장애·제휴·제안·기타 문의 대표 전화 */
 const CONTACT_PHONE_DISPLAY = "(+82) 02-6925-0034";
 const CONTACT_PHONE_TEL = "+82-2-6925-0034";
+/** 무료상담 신청 폼(외부) — nav·하단 CTA에서 연결 */
+const CONSULT_URL = "https://goventureforum.com/consult";
 
 /** 마이페이지 프로필 (디지털 명함·인사말에 사용. 로그인 없이 이 브라우저에 저장) */
 interface MyProfile {
@@ -396,21 +398,28 @@ export default function Home() {
               <button type="button" className="transition hover:opacity-60">
                 서비스 문의
               </button>
-              <button type="button" className="transition hover:opacity-60">
+              <a
+                href={CONSULT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition hover:opacity-60"
+              >
                 무료상담
-              </button>
+              </a>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className={`rounded-2xl px-4 py-2 text-sm font-bold transition ${
+              <a
+                href={CONSULT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-block rounded-2xl px-4 py-2 text-sm font-bold transition ${
                   scrolled
                     ? "bg-brand text-white hover:bg-brand/90"
                     : "bg-white text-brand hover:bg-white/90"
                 }`}
               >
                 무료상담
-              </button>
+              </a>
               {/* 로그인: hover 시 채움 반전 */}
               <button
                 type="button"
@@ -471,6 +480,8 @@ export default function Home() {
                 onClick={() => {
                   setMobileMenuOpen(false);
                   if (label === "지원사업 찾기") setView("search");
+                  if (label === "무료상담")
+                    window.open(CONSULT_URL, "_blank", "noopener");
                 }}
                 className="w-full rounded-lg px-3 py-3 text-left text-sm font-semibold text-white/90 transition hover:bg-white/10"
               >
@@ -478,12 +489,15 @@ export default function Home() {
               </button>
             ))}
             <div className="mt-2 flex gap-2">
-              <button
-                type="button"
-                className="flex-1 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-brand"
+              <a
+                href={CONSULT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 rounded-2xl bg-white px-4 py-2.5 text-center text-sm font-bold text-brand"
               >
                 무료상담
-              </button>
+              </a>
               <button
                 type="button"
                 className="flex-1 rounded-2xl border border-white/70 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white hover:text-brand"
@@ -2450,9 +2464,11 @@ function HomeV2() {
           <p className="mt-3 text-2xl font-bold text-[#181818] sm:text-4xl">
             <span className="text-brand">당신의 성장</span>을 브랜드라이즈에서
           </p>
-          <button
-            type="button"
-            className="group relative mt-8 overflow-hidden rounded-2xl bg-brand px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:shadow-xl"
+          <a
+            href={CONSULT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative mt-8 inline-block overflow-hidden rounded-2xl bg-brand px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:shadow-xl"
           >
             <span className="relative z-10">무료상담 신청하기</span>
             {/* hover 시 가운데서 천천히 그려지는 동심원 (대기 시엔 안 보임) */}
@@ -2461,7 +2477,7 @@ function HomeV2() {
               className="end-ripple pointer-events-none absolute left-1/2 top-1/2 h-44 w-44 rounded-full border border-white/45 opacity-0"
               style={{ animationDelay: "0.35s" }}
             />
-          </button>
+          </a>
         </div>
       </section>
 
