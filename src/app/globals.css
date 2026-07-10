@@ -174,23 +174,46 @@ html {
 }
 .ring-out { animation: ring-out 14s linear infinite backwards; }
 
-/* 단어(branding/marketing)가 동심원 따라 바깥으로 이동하며 사라짐(무한) */
+/* 로고가 동심원 따라 바깥으로 이동하며 커지고(100%→140%) 사라짐(무한).
+   중앙 근처(0~35%)에선 투명을 오래 유지 → 가운데 문구에 집중되고,
+   바깥으로 나가면서(35~60%) 서서히 진해졌다가 끝에서 사라짐. */
 @keyframes word-out {
-  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-  18% { opacity: 0.5; }
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  35% { opacity: 0; }
+  60% { opacity: 0.5; }
   100% {
-    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1);
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.4);
     opacity: 0;
   }
 }
+/* 이동 속도(주기)는 원래대로 14s. 등장 간격은 각 로고 delay(2.1s 간격)로 조절 */
 .word-out { animation: word-out 14s linear infinite backwards; }
+/* 모바일은 이동 거리(vmin)가 짧아 느려 보이므로 주기를 줄여 더 빠르게 */
+@media (max-width: 767px) {
+  .word-out { animation-duration: 8s; }
+}
 
-/* 메인 비주얼 하단 스크롤 유도 — 은은하게 위아래로 반복 */
+/* 메인 비주얼 하단 스크롤 유도 — 은은하게 위아래로 반복 (가로 중앙은 margin으로) */
 @keyframes scroll-hint {
-  0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
-  50% { transform: translate(-50%, 6px); opacity: 1; }
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(6px); opacity: 1; }
 }
 .scroll-hint { animation: scroll-hint 1.8s ease-in-out infinite; }
+
+/* end 섹션 배경 동심원 — 천천히 확대/축소 반복(메인비주얼처럼 퍼지는 느낌) */
+@keyframes end-expand {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.16); }
+}
+.end-expand { animation: end-expand 12s ease-in-out infinite; }
+
+/* 로딩 단계 아이콘 — 단계가 바뀔 때마다 왼쪽에서 슬라이드되며 등장 */
+@keyframes icon-slide-in {
+  0% { transform: translateX(44px); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.icon-slide-in { animation: icon-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
 
 /* end 버튼 hover — 가운데서 동심원이 천천히 그려짐(대기 시 안 보임) */
 @keyframes end-ripple {
@@ -203,7 +226,8 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .rise-float, .rise-wiggle, .rise-blink, .rise-pop,
   .animate-slow-spin, .revolve, .counter-revolve, .end-ripple,
-  .ring-out, .word-out, .scroll-hint { animation: none; }
+  .ring-out, .word-out, .scroll-hint, .icon-slide-in,
+  .end-expand { animation: none; }
 }
 
 body {
